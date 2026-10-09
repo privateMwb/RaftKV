@@ -2,24 +2,15 @@
 # CMakeLists.txt — backend
 # ============================================================
 #
-# Top-level build file for backend/. Any git submodules vendored
-# under external/ (see .gitmodules once you add one) get pulled
-# in via add_subdirectory below.
-#
-# TODO when starting a new app from this template:
-#   - Rename the project() call below.
-#   - Rename the `app_backend` executable target if you want a
-#     different binary name -- just keep it in sync with
-#     BINARY_NAME in ../Dockerfile, since that's the name Docker
-#     copies out of the build and runs.
-#   - Replace src/main.cpp / include/sample.h with real code,
-#     and update the sources list below to match.
+# Top-level build file for backend/. The four submodules vendored
+# under external/ (see .gitmodules) get pulled in via
+# add_subdirectory below.
 # ============================================================
 
 cmake_minimum_required(VERSION 3.20)
 
 project(
-    AppName
+    RaftKV
     VERSION 0.1.0
     LANGUAGES CXX
 )
@@ -45,39 +36,73 @@ set(BUILD_BENCHMARKS OFF CACHE BOOL "" FORCE)
 set(BUILD_REGRESSION OFF CACHE BOOL "" FORCE)
 set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 
-# TODO: uncomment and add one line per submodule once you've
-# added it under external/ (see external/.gitkeep). Example:
-# add_subdirectory(external/somelib)
+# external/raftcore      -> RaftCore     (Raft consensus: RaftNode, NodeState, interfaces)
+# external/falconhttp    -> FalconHTTP   (HTTP server/client, routing, SSE)
+# external/ratethrottle  -> ThrottlePro  (rate limiter for the client API)
+# external/minidatabase  -> MiniDB       (WriteAheadLog backing each node's Raft log)
 #
-# NOTE: if a submodule itself vendors independent copies of
-# other shared libraries, and you add more than one submodule
-# that vendors the *same* shared dependency, linking can fail
-# with "multiple definition of ..." -- that's a submodule-level
-# packaging issue, not something wrong with this file. Try
-# building first; only chase that fix if the linker actually
-# complains.
+# NOTE: all four submodules vendor independent copies of shared libraries
+# (VectorPro, for instance). If more than one of them compiles the *same*
+# shared dependency's sources, linking can fail with "multiple definition
+# of ..." -- that's a submodule-level packaging issue, not something wrong
+# with this file.
+add_subdirectory(external/raftcore)
+add_subdirectory(external/falconhttp)
+add_subdirectory(external/ratethrottle)
+add_subdirectory(external/minidatabase)
 
 # ============================================================================
-# Executable
+# App library + executable
 # ============================================================================
 
-# TODO: rename this target if you rename the binary -- keep it in
-# sync with BINARY_NAME in ../Dockerfile.
-add_executable(
-    app_backend
-    src/main.cpp
+# Everything except main.cpp goes into one static library so the executable
+# and the test binary link the exact same code.
+file(GLOB_RECURSE APP_SOURCES CONFIGURE_DEPENDS
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
 )
+list(FILTER APP_SOURCES EXCLUDE REGEX ".*/src/main\\.cpp$")
+
+add_library(raftkv_core STATIC ${APP_SOURCES})
 
 target_include_directories(
-    app_backend
-    PRIVATE
+    raftkv_core
+    PUBLIC
         include
         src
 )
 
-# TODO: link any submodules added above, e.g.:
-# target_link_libraries(
-#     app_backend
-#     PRIVATE
-#         SomeLib
-# )
+target_link_libraries(
+    raftkv_core
+    PUBLIC
+        RaftCore
+        FalconHTTP
+        ThrottlePro
+        MiniDB
+)
+
+add_executable(raftkv_backend src/main.cpp)
+target_link_libraries(raftkv_backend PRIVATE raftkv_core)
+
+# ============================================================================
+# Tests
+# ============================================================================
+
+# Named RAFTKV_BUILD_TESTS, not BUILD_TESTS: the latter is force-set OFF above
+# for the submodules.
+option(RAFTKV_BUILD_TESTS "Build the RaftKV test suite" ON)
+
+if(RAFTKV_BUILD_TESTS)
+    file(GLOB_RECURSE TEST_SOURCES CONFIGURE_DEPENDS
+        "${CMAKE_CURRENT_SOURCE_DIR}/tests/*.cpp"
+    )
+
+    add_executable(raftkv_tests ${TEST_SOURCES})
+
+    target_include_directories(
+        raftkv_tests
+        PRIVATE
+            ${CMAKE_CURRENT_SOURCE_DIR}/tests
+    )
+
+    target_link_libraries(raftkv_tests PRIVATE raftkv_core)
+endif()

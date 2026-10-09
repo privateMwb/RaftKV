@@ -56,7 +56,7 @@ WORKDIR /app
 # Declared as ARG + ENV (not ARG alone) because ARG values don't
 # survive into the final image at container-run time -- only ENV
 # does, which CMD's shell form below then reads.
-ARG BINARY_NAME=app_backend
+ARG BINARY_NAME=raftkv_backend
 ENV BINARY_NAME=${BINARY_NAME}
 
 COPY --from=build /app/backend/build/${BINARY_NAME} /app/${BINARY_NAME}
