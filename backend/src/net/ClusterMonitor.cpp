@@ -36,7 +36,8 @@ std::string toJson(const ClusterSnapshot& snapshot) {
     std::string json = "{";
     json += "\"observer\":" + Node::jsonQuote(snapshot.observer);
     json += ",\"term\":" + std::to_string(snapshot.term);
-    json += ",\"leader\":" + (snapshot.leader ? Node::jsonQuote(*snapshot.leader) : std::string("null"));
+    json += ",\"leader\":" +
+            (snapshot.leader ? Node::jsonQuote(*snapshot.leader) : std::string("null"));
     json += std::string(",\"quorum\":") + (snapshot.quorum ? "true" : "false");
     json += ",\"members\":[";
 
@@ -112,8 +113,9 @@ void ClusterMonitor::start() {
 
     const std::vector<PeerAddress>& peers = node_.peers();
     for (std::size_t i = 0; i < peers.size(); ++i)
-        threads_.emplace_back(
-            [this, i, host = peers[i].host, port = peers[i].port]() { watchPeer(i + 1, host, port); });
+        threads_.emplace_back([this, i, host = peers[i].host, port = peers[i].port]() {
+            watchPeer(i + 1, host, port);
+        });
 }
 
 void ClusterMonitor::stop() {
@@ -137,7 +139,8 @@ void ClusterMonitor::stop() {
 // ============================================================
 
 // Records a member's status; bumps the version only if it really changed.
-void ClusterMonitor::setMember(std::size_t index, bool up, std::optional<Node::NodeSnapshot> state) {
+void ClusterMonitor::setMember(std::size_t index, bool up,
+                               std::optional<Node::NodeSnapshot> state) {
     {
         std::lock_guard lock(mutex_);
         ClusterMember next{members_[index].id, up, up ? std::move(state) : std::nullopt};

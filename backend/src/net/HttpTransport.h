@@ -82,9 +82,9 @@ class HttpTransport final : public RaftCore::Transport {
     /// Called (under that same lock, just *before* RaftCore sees the reply)
     /// for every decoded AppendEntries reply. @p sentAt is when the RPC was
     /// handed to the transport, a lower bound on when the peer processed it.
-    using AckObserver = std::function<void(const RaftCore::NodeId& peer,
-                                           const RaftCore::AppendEntriesReply& reply,
-                                           std::chrono::steady_clock::time_point sentAt)>;
+    using AckObserver =
+        std::function<void(const RaftCore::NodeId& peer, const RaftCore::AppendEntriesReply& reply,
+                           std::chrono::steady_clock::time_point sentAt)>;
 
   private:
     struct PeerSender {
@@ -135,14 +135,14 @@ class HttpTransport final : public RaftCore::Transport {
 
     /// @return `NOT_FOUND` if @p target isn't a configured peer; otherwise `OK`
     /// (delivery is asynchronous and best-effort).
-    [[nodiscard]] RaftCore::Status
-    sendRequestVote(const RaftCore::NodeId& target, RaftCore::RequestVoteArgs args,
-                    FunctionPro::MoveOnlyFunction<void(RaftCore::RequestVoteReply)> onReply) override;
+    [[nodiscard]] RaftCore::Status sendRequestVote(
+        const RaftCore::NodeId& target, RaftCore::RequestVoteArgs args,
+        FunctionPro::MoveOnlyFunction<void(RaftCore::RequestVoteReply)> onReply) override;
 
     /// @copydoc sendRequestVote
-    [[nodiscard]] RaftCore::Status
-    sendAppendEntries(const RaftCore::NodeId& target, RaftCore::AppendEntriesArgs args,
-                      FunctionPro::MoveOnlyFunction<void(RaftCore::AppendEntriesReply)> onReply) override;
+    [[nodiscard]] RaftCore::Status sendAppendEntries(
+        const RaftCore::NodeId& target, RaftCore::AppendEntriesArgs args,
+        FunctionPro::MoveOnlyFunction<void(RaftCore::AppendEntriesReply)> onReply) override;
 };
 
 } // namespace RaftKV::Net

@@ -61,13 +61,9 @@ FalconHTTP::Config::ServerConfig makeServerConfig(const NodeServerOptions& optio
 } // namespace
 
 NodeServer::NodeServer(Node::KvNode& node, uint16_t port, NodeServerOptions options)
-    : node_(node)
-    , router_()
-    , options_(std::move(options))
-    , server_(router_, makeServerConfig(options_))
-    , api_(node, options_.api)
-    , monitor_(node, options_.monitor)
-    , port_(port) {
+    : node_(node), router_(), options_(std::move(options)),
+      server_(router_, makeServerConfig(options_)), api_(node, options_.api),
+      monitor_(node, options_.monitor), port_(port) {
     registerRoutes();
 
     // Order matters: CORS first so its headers (and OPTIONS preflight answers)
@@ -130,9 +126,10 @@ void NodeServer::registerRoutes() {
         response.setBody(toJson(monitor_.snapshot()));
     });
 
-    router_.stream("/events", [this](const HttpRequest&, FalconHTTP::Streaming::SseConnection& sse) {
-        streamNodeState(sse);
-    });
+    router_.stream("/events",
+                   [this](const HttpRequest&, FalconHTTP::Streaming::SseConnection& sse) {
+                       streamNodeState(sse);
+                   });
 
     router_.stream("/cluster/events",
                    [this](const HttpRequest&, FalconHTTP::Streaming::SseConnection& sse) {
@@ -154,7 +151,8 @@ void NodeServer::streamNodeState(FalconHTTP::Streaming::SseConnection& sse) {
     auto lastSent = std::chrono::steady_clock::now();
 
     while (!stopping_.load() && sse.isConnected()) {
-        const Node::StateUpdate update = node_.waitForChange(version, std::chrono::milliseconds(250));
+        const Node::StateUpdate update =
+            node_.waitForChange(version, std::chrono::milliseconds(250));
         const auto now = std::chrono::steady_clock::now();
 
         if (update.version != version) {
@@ -175,7 +173,8 @@ void NodeServer::streamClusterState(FalconHTTP::Streaming::SseConnection& sse) {
     auto lastSent = std::chrono::steady_clock::now();
 
     while (!stopping_.load() && sse.isConnected()) {
-        const ClusterUpdate update = monitor_.waitForChange(version, std::chrono::milliseconds(250));
+        const ClusterUpdate update =
+            monitor_.waitForChange(version, std::chrono::milliseconds(250));
         const auto now = std::chrono::steady_clock::now();
 
         if (update.version != version) {

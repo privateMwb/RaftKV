@@ -118,8 +118,8 @@ class KvNode {
 
     // Declared before transport_: the transport's threads call back into
     // these, so they must be destroyed after it.
-    mutable std::mutex mutex_;              ///< Guards state_/raft_ and everything they touch.
-    std::condition_variable condition_;     ///< Signalled after every tick, apply, and RPC.
+    mutable std::mutex mutex_;               ///< Guards state_/raft_ and everything they touch.
+    std::condition_variable condition_;      ///< Signalled after every tick, apply, and RPC.
     std::optional<std::string> knownLeader_; ///< Leader seen via AppendEntries (guarded by mutex_).
     RaftCore::Term knownLeaderTerm_ = RaftCore::kNoTerm;
 
@@ -147,7 +147,8 @@ class KvNode {
     [[nodiscard]] NodeSnapshot snapshotLocked() const;
     [[nodiscard]] std::optional<std::string> leaderIdLocked() const;
     void refreshSnapshotLocked();
-    [[nodiscard]] SubmitResult submit(const Kv::KvCommand& command, std::chrono::milliseconds timeout);
+    [[nodiscard]] SubmitResult submit(const Kv::KvCommand& command,
+                                      std::chrono::milliseconds timeout);
     void tickLoop();
 
   public:
@@ -196,8 +197,9 @@ class KvNode {
      * @return `NotLeader` if not Leader at the start or leadership is lost while
      * waiting; `Timeout` if confirmation doesn't arrive in time (e.g. no quorum).
      */
-    [[nodiscard]] ReadResult readLinearizable(const std::string& key,
-                                              std::chrono::milliseconds timeout = std::chrono::seconds(2));
+    [[nodiscard]] ReadResult
+    readLinearizable(const std::string& key,
+                     std::chrono::milliseconds timeout = std::chrono::seconds(2));
 
     [[nodiscard]] std::size_t size() const;
 

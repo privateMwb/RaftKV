@@ -89,11 +89,15 @@ class ClientApi {
     ClientApiConfig config_;
     std::unique_ptr<ThrottlePro::RateLimiter> limiter_;
 
-    void handleGet(const FalconHTTP::HTTP::HttpRequest& request, FalconHTTP::HTTP::HttpResponse& response);
-    void handlePut(const FalconHTTP::HTTP::HttpRequest& request, FalconHTTP::HTTP::HttpResponse& response);
-    void handleDelete(const FalconHTTP::HTTP::HttpRequest& request, FalconHTTP::HTTP::HttpResponse& response);
+    void handleGet(const FalconHTTP::HTTP::HttpRequest& request,
+                   FalconHTTP::HTTP::HttpResponse& response);
+    void handlePut(const FalconHTTP::HTTP::HttpRequest& request,
+                   FalconHTTP::HTTP::HttpResponse& response);
+    void handleDelete(const FalconHTTP::HTTP::HttpRequest& request,
+                      FalconHTTP::HTTP::HttpResponse& response);
 
-    void redirectToLeader(const FalconHTTP::HTTP::HttpRequest& request, FalconHTTP::HTTP::HttpResponse& response);
+    void redirectToLeader(const FalconHTTP::HTTP::HttpRequest& request,
+                          FalconHTTP::HTTP::HttpResponse& response);
 
   public:
     /// @param node The node to serve; must outlive this object.

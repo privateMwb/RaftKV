@@ -53,9 +53,13 @@ inline constexpr const char* kAppendEntriesPath = "/raft/append-entries";
 [[nodiscard]] std::string encode(const RaftCore::AppendEntriesArgs& message);
 [[nodiscard]] std::string encode(const RaftCore::AppendEntriesReply& message);
 
-[[nodiscard]] std::optional<RaftCore::RequestVoteArgs> decodeRequestVoteArgs(std::string_view bytes);
-[[nodiscard]] std::optional<RaftCore::RequestVoteReply> decodeRequestVoteReply(std::string_view bytes);
-[[nodiscard]] std::optional<RaftCore::AppendEntriesArgs> decodeAppendEntriesArgs(std::string_view bytes);
-[[nodiscard]] std::optional<RaftCore::AppendEntriesReply> decodeAppendEntriesReply(std::string_view bytes);
+[[nodiscard]] std::optional<RaftCore::RequestVoteArgs>
+decodeRequestVoteArgs(std::string_view bytes);
+[[nodiscard]] std::optional<RaftCore::RequestVoteReply>
+decodeRequestVoteReply(std::string_view bytes);
+[[nodiscard]] std::optional<RaftCore::AppendEntriesArgs>
+decodeAppendEntriesArgs(std::string_view bytes);
+[[nodiscard]] std::optional<RaftCore::AppendEntriesReply>
+decodeAppendEntriesReply(std::string_view bytes);
 
 } // namespace RaftKV::Net

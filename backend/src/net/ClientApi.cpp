@@ -70,8 +70,7 @@ std::string clientKey(const HttpRequest& request) {
 //  Section 2 — Construction, Routes & Rate Limiting
 // ============================================================
 
-ClientApi::ClientApi(Node::KvNode& node, ClientApiConfig config)
-    : node_(node), config_(config) {
+ClientApi::ClientApi(Node::KvNode& node, ClientApiConfig config) : node_(node), config_(config) {
     if (config_.rateLimitRequests > 0)
         limiter_ = std::make_unique<ThrottlePro::RateLimiter>(
             config_.rateLimitRequests, config_.rateLimitWindow, config_.rateLimitTrackedClients);
@@ -91,7 +90,8 @@ void ClientApi::registerRoutes(FalconHTTP::Routing::Router& router) {
 
 void ClientApi::rateLimit(HttpRequest& request, HttpResponse& response,
                           const FalconHTTP::Middleware::NextHandler& next) {
-    if (limiter_ && request.path().rfind(kKvPrefix, 0) == 0 && !limiter_->allow(clientKey(request))) {
+    if (limiter_ && request.path().rfind(kKvPrefix, 0) == 0 &&
+        !limiter_->allow(clientKey(request))) {
         plain(response, HttpStatus::TooManyRequests, "rate limit exceeded; slow down and retry");
         response.setHeader("Retry-After", "1");
         stamp(response, node_);

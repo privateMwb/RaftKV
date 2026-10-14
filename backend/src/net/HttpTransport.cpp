@@ -52,10 +52,8 @@ HashMapPro::HashMap<std::string, std::string> binaryHeaders() {
 
 HttpTransport::HttpTransport(const std::vector<PeerAddress>& peers, LockedRunner runner,
                              TransportOptions options, AckObserver ackObserver)
-    : options_(options)
-    , clientOptions_(clientOptions(options))
-    , runner_(std::move(runner))
-    , ackObserver_(std::move(ackObserver)) {
+    : options_(options), clientOptions_(clientOptions(options)), runner_(std::move(runner)),
+      ackObserver_(std::move(ackObserver)) {
     for (const PeerAddress& peer : peers) {
         auto sender = std::make_unique<PeerSender>();
         sender->address = peer;
@@ -110,7 +108,8 @@ void HttpTransport::enqueue(const NodeId& target, FunctionPro::MoveOnlyFunction<
         // this, when a round trip takes longer than the heartbeat interval, a new
         // entry would wait behind a backlog of stale heartbeats.
         if (supersedable)
-            std::erase_if(sender.queue, [](const PeerSender::Pending& p) { return p.supersedable; });
+            std::erase_if(sender.queue,
+                          [](const PeerSender::Pending& p) { return p.supersedable; });
 
         if (sender.queue.size() >= options_.maxQueuedPerPeer)
             sender.queue.pop_front(); // Oldest is the stalest; Raft will resend.
@@ -145,19 +144,23 @@ void HttpTransport::senderLoop(PeerSender& sender) {
 //  Section 4 — Transport Interface
 // ============================================================
 
-Status HttpTransport::sendRequestVote(const NodeId& target, RequestVoteArgs args,
-                                      FunctionPro::MoveOnlyFunction<void(RequestVoteReply)> onReply) {
+Status
+HttpTransport::sendRequestVote(const NodeId& target, RequestVoteArgs args,
+                               FunctionPro::MoveOnlyFunction<void(RequestVoteReply)> onReply) {
     const auto found = senders_.find(target);
     if (found == senders_.end())
         return Status::NOT_FOUND;
 
-    PeerAddress address = found->second->address; // Non-const: a const capture would be copied, not moved (not nothrow).
+    PeerAddress address =
+        found->second
+            ->address; // Non-const: a const capture would be copied, not moved (not nothrow).
     std::string body = encode(args);
 
     enqueue(target, [this, address = std::move(address), body = std::move(body),
-                      onReply = std::move(onReply)]() mutable {
+                     onReply = std::move(onReply)]() mutable {
         const auto response =
-            clientFor(body.size()).post(address.host, address.port, kRequestVotePath, body, binaryHeaders());
+            clientFor(body.size())
+                .post(address.host, address.port, kRequestVotePath, body, binaryHeaders());
         if (!response || !response->ok())
             return;
 
@@ -174,34 +177,41 @@ Status HttpTransport::sendRequestVote(const NodeId& target, RequestVoteArgs args
     return Status::OK;
 }
 
-Status HttpTransport::sendAppendEntries(const NodeId& target, AppendEntriesArgs args,
-                                        FunctionPro::MoveOnlyFunction<void(AppendEntriesReply)> onReply) {
+Status
+HttpTransport::sendAppendEntries(const NodeId& target, AppendEntriesArgs args,
+                                 FunctionPro::MoveOnlyFunction<void(AppendEntriesReply)> onReply) {
     const auto found = senders_.find(target);
     if (found == senders_.end())
         return Status::NOT_FOUND;
 
-    PeerAddress address = found->second->address; // Non-const: a const capture would be copied, not moved (not nothrow).
+    PeerAddress address =
+        found->second
+            ->address; // Non-const: a const capture would be copied, not moved (not nothrow).
     std::string body = encode(args);
     const auto sentAt = std::chrono::steady_clock::now();
 
-    enqueue(target, [this, peerId = target, address = std::move(address), body = std::move(body),
-                     sentAt, onReply = std::move(onReply)]() mutable {
-        const auto response =
-            clientFor(body.size()).post(address.host, address.port, kAppendEntriesPath, body, binaryHeaders());
-        if (!response || !response->ok())
-            return;
+    enqueue(
+        target,
+        [this, peerId = target, address = std::move(address), body = std::move(body), sentAt,
+         onReply = std::move(onReply)]() mutable {
+            const auto response =
+                clientFor(body.size())
+                    .post(address.host, address.port, kAppendEntriesPath, body, binaryHeaders());
+            if (!response || !response->ok())
+                return;
 
-        const auto reply = decodeAppendEntriesReply(response->body);
-        if (!reply)
-            return;
+            const auto reply = decodeAppendEntriesReply(response->body);
+            if (!reply)
+                return;
 
-        FunctionPro::MoveOnlyFunction<void()> deliver = [&]() mutable {
-            if (ackObserver_)
-                ackObserver_(peerId, *reply, sentAt);
-            onReply(*reply);
-        };
-        runner_(deliver);
-    }, /*supersedable=*/true);
+            FunctionPro::MoveOnlyFunction<void()> deliver = [&]() mutable {
+                if (ackObserver_)
+                    ackObserver_(peerId, *reply, sentAt);
+                onReply(*reply);
+            };
+            runner_(deliver);
+        },
+        /*supersedable=*/true);
 
     return Status::OK;
 }

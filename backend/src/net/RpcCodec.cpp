@@ -96,7 +96,8 @@ class Reader {
             return false;
         out = 0;
         for (int i = 0; i < 4; ++i)
-            out |= static_cast<std::uint32_t>(static_cast<std::uint8_t>(data_[pos_ + i])) << (8 * i);
+            out |= static_cast<std::uint32_t>(static_cast<std::uint8_t>(data_[pos_ + i]))
+                   << (8 * i);
         pos_ += 4;
         return true;
     }
@@ -106,7 +107,8 @@ class Reader {
             return false;
         out = 0;
         for (int i = 0; i < 8; ++i)
-            out |= static_cast<std::uint64_t>(static_cast<std::uint8_t>(data_[pos_ + i])) << (8 * i);
+            out |= static_cast<std::uint64_t>(static_cast<std::uint8_t>(data_[pos_ + i]))
+                   << (8 * i);
         pos_ += 8;
         return true;
     }

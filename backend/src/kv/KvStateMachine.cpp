@@ -27,7 +27,8 @@ namespace RaftKV::Kv {
 //  Section 1 — Applying Commands
 // ============================================================
 
-void KvStateMachine::apply(RaftCore::LogIndex index, const VectorPro::Vector<std::uint8_t>& payload) {
+void KvStateMachine::apply(RaftCore::LogIndex index,
+                           const VectorPro::Vector<std::uint8_t>& payload) {
     const std::optional<KvCommand> command = decodeCommand(payload);
 
     if (!command) {

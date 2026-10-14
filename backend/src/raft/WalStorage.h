@@ -59,8 +59,9 @@ class WalStorage final : public RaftCore::Storage {
                                           RaftCore::LogIndex& outIndex) override;
     [[nodiscard]] RaftCore::Status entryAt(RaftCore::LogIndex index,
                                            RaftCore::LogEntry& outEntry) const override;
-    [[nodiscard]] RaftCore::Status range(RaftCore::LogIndex fromIndex, RaftCore::LogIndex toIndex,
-                                         VectorPro::Vector<RaftCore::LogEntry>& outEntries) const override;
+    [[nodiscard]] RaftCore::Status
+    range(RaftCore::LogIndex fromIndex, RaftCore::LogIndex toIndex,
+          VectorPro::Vector<RaftCore::LogEntry>& outEntries) const override;
     [[nodiscard]] RaftCore::Status truncateFrom(RaftCore::LogIndex index) override;
     RaftCore::LogIndex lastIndex() const override;
     RaftCore::Term lastTerm() const override;

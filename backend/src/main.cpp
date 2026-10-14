@@ -69,8 +69,7 @@ bool parsePort(const std::string& text, uint16_t& out) {
 bool parsePeer(const std::string& text, RaftKV::Net::PeerAddress& out) {
     const std::size_t equals = text.find('=');
     const std::size_t colon = text.rfind(':');
-    if (equals == std::string::npos || colon == std::string::npos || colon < equals ||
-        equals == 0)
+    if (equals == std::string::npos || colon == std::string::npos || colon < equals || equals == 0)
         return false;
 
     out.id = text.substr(0, equals);
@@ -136,7 +135,8 @@ int main(int argc, char** argv) {
             std::size_t threads = 0;
             const std::string text = argv[++i];
             const auto parsed = std::from_chars(text.data(), text.data() + text.size(), threads);
-            if (parsed.ec != std::errc() || parsed.ptr != text.data() + text.size() || threads < 2) {
+            if (parsed.ec != std::errc() || parsed.ptr != text.data() + text.size() ||
+                threads < 2) {
                 std::fprintf(stderr, "bad --threads (need at least 2)\n");
                 return 2;
             }
@@ -240,7 +240,8 @@ int main(int argc, char** argv) {
                 const auto leader = node.leaderId();
                 std::printf("role=%s term=%llu leader=%s keys=%zu commit=%llu applied=%llu "
                             "lastLog=%llu\n",
-                            RaftKV::Node::roleName(node.role()), static_cast<unsigned long long>(node.term()),
+                            RaftKV::Node::roleName(node.role()),
+                            static_cast<unsigned long long>(node.term()),
                             leader ? leader->c_str() : "?", node.size(),
                             static_cast<unsigned long long>(node.commitIndex()),
                             static_cast<unsigned long long>(node.lastApplied()),

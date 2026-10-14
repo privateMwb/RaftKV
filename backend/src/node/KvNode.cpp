@@ -49,10 +49,9 @@ const char* toString(SubmitResult result) noexcept {
 // ============================================================
 
 KvNode::KvNode(KvNodeConfig config)
-    : config_(std::move(config))
-    , persistent_(config_.dataDir + "/" + config_.nodeId + ".state")
-    , storage_(config_.dataDir + "/" + config_.nodeId + ".wal")
-    , transport_(
+    : config_(std::move(config)), persistent_(config_.dataDir + "/" + config_.nodeId + ".state"),
+      storage_(config_.dataDir + "/" + config_.nodeId + ".wal"),
+      transport_(
           config_.peers,
           [this](FunctionPro::MoveOnlyFunction<void()>& deliver) {
               {
@@ -95,10 +94,9 @@ Status KvNode::open() {
     for (const Net::PeerAddress& peer : config_.peers)
         peerIds.push_back(peer.id);
 
-    raft_ = std::make_unique<RaftNode>(*state_, transport_, random_, peerIds,
-                                       config_.electionTimeoutMinTicks,
-                                       config_.electionTimeoutMaxTicks,
-                                       config_.heartbeatIntervalTicks);
+    raft_ = std::make_unique<RaftNode>(
+        *state_, transport_, random_, peerIds, config_.electionTimeoutMinTicks,
+        config_.electionTimeoutMaxTicks, config_.heartbeatIntervalTicks);
     raft_->setStateMachine(&machine_);
 
     {
@@ -325,11 +323,13 @@ NodeSnapshot KvNode::snapshot() const {
 }
 
 void KvNode::wakeListeners() const {
-    std::lock_guard lock(mutex_); // Take the lock so a waiter can't miss the signal between check and sleep.
+    std::lock_guard lock(
+        mutex_); // Take the lock so a waiter can't miss the signal between check and sleep.
     stateCondition_.notify_all();
 }
 
-StateUpdate KvNode::waitForChange(std::uint64_t lastVersion, std::chrono::milliseconds timeout) const {
+StateUpdate KvNode::waitForChange(std::uint64_t lastVersion,
+                                  std::chrono::milliseconds timeout) const {
     std::unique_lock lock(mutex_);
     stateCondition_.wait_for(lock, timeout, [&]() { return stateVersion_ != lastVersion; });
     return StateUpdate{stateVersion_, lastSnapshot_};
@@ -419,7 +419,6 @@ LogIndex KvNode::lastLogIndex() const {
     std::lock_guard lock(mutex_);
     return storage_.lastIndex();
 }
-
 
 Status KvNode::lastTickError() const noexcept {
     return lastTickError_.load();

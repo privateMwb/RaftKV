@@ -113,7 +113,8 @@ std::optional<NodeSnapshot> parseSnapshot(std::string_view json) {
         if (!readCount(root, "term", snapshot.term) ||
             !readCount(root, "commitIndex", snapshot.commitIndex) ||
             !readCount(root, "lastApplied", snapshot.lastApplied) ||
-            !readCount(root, "lastLogIndex", snapshot.lastLogIndex) || !readCount(root, "keys", keys))
+            !readCount(root, "lastLogIndex", snapshot.lastLogIndex) ||
+            !readCount(root, "keys", keys))
             return std::nullopt;
         snapshot.keys = static_cast<std::size_t>(keys);
 

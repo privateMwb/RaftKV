@@ -128,7 +128,8 @@ Status FilePersistentState::open() {
     if (!file)
         return Status::IO_ERROR;
 
-    const std::string data((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+    const std::string data((std::istreambuf_iterator<char>(file)),
+                           std::istreambuf_iterator<char>());
 
     Term term = kNoTerm;
     std::optional<NodeId> vote;
