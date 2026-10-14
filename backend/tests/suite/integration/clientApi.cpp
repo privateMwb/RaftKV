@@ -98,6 +98,30 @@ static void follower_redirects_to_leader() {
     CHK(del.has_value() && del->statusCode == 204);
 }
 
+// Verifies the redirect uses a peer's configured public URL (not the address peers
+// use to reach it), and ignores a trailing slash on it.
+static void redirect_uses_public_url() {
+    TestCluster cluster(3, 19320, TestCluster::defaultApi(), "localhost");
+    CHK(cluster.startAll());
+
+    const int leader = cluster.waitForLeader();
+    CHK(leader >= 0);
+    if (leader < 0)
+        return;
+
+    const int follower = (leader + 1) % 3;
+    for (int i = 0; i < 300 && !cluster.node(follower).leaderId(); ++i)
+        std::this_thread::sleep_for(10ms);
+
+    auto redirect = api::call(HttpMethod::Put, cluster.portOf(follower), kvPath("p"), "1");
+    CHK(redirect.has_value() && redirect->statusCode == 307);
+    if (redirect) {
+        // "localhost", not the peer address 127.0.0.1; one slash, not two.
+        CHK(redirect->headers["location"] ==
+            "http://localhost:" + std::to_string(cluster.portOf(leader)) + "/kv/p");
+    }
+}
+
 // Verifies ?stale=1 answers from the follower's own map, no redirect.
 static void stale_read_stays_local() {
     TestCluster cluster(3, 18920);
@@ -382,6 +406,7 @@ static void rate_limit_covers_kv_only() {
 static void run_tests() {
     RUN(leader_put_get_delete);
     RUN(follower_redirects_to_leader);
+    RUN(redirect_uses_public_url);
     RUN(stale_read_stays_local);
     RUN(binary_keys_and_values);
     RUN(invalid_requests_rejected);

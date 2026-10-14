@@ -5,11 +5,11 @@ with a live web dashboard that shows leader election and log replication as
 they happen. The centerpiece is a "kill this node" button: stop the leader and
 watch the cluster elect a new one in about half a second.
 
-> **Status: Phase 4 — live cluster state.** Three processes elect a leader over
-> HTTP, replicate through a durable WAL, survive `kill -9` of the leader, serve a
-> `curl`-able key-value API with leader redirects, linearizable reads, and rate
-> limiting, and push their state (leader, term, per-node role, log indexes) as
-> Server-Sent Events. The dashboard that draws it is Phase 5. Nothing is deployed.
+> **Status: Phase 6 — complete.** Three processes elect a leader, replicate through a
+> durable log, survive `kill -9`, and serve a key-value API with linearizable reads. A
+> responsive dashboard (desktop and phone) shows every node's own view live, and can
+> crash, revive, slow down, and partition the real processes. Written explanation in
+> [docs/](docs/ARCHITECTURE.md). Docker setup included but untested. Nothing is deployed.
 
 ## Stack
 
@@ -29,7 +29,7 @@ watch the cluster elect a new one in about half a second.
 | 2 | Multi-node: peer RPC over FalconHTTP, static peer list, 3-node cluster (done) |
 | 3 | Client API: `GET`/`PUT`/`DELETE` on the leader, follower redirects, rate limiting (done) |
 | 4 | Live cluster-state endpoint over SSE (done) |
-| 5 | Frontend dashboard with the kill-node button |
+| 5 | Frontend dashboard with the kill-node button (done) |
 | 6 | Stretch: network delay/partition controls, per-node Docker |
 
 ## Layout
@@ -47,9 +47,11 @@ RaftKV/
 │   ├── tests/          Custom-framework suites (unit/, integration/)
 │   ├── include/        App headers
 │   └── data/           Runtime data (WAL files); mount as a volume in Docker
-├── frontend/           Dashboard (Phase 5)
-├── docs/
-├── Dockerfile
+├── frontend/           Dashboard: React + Vite + Tailwind (see frontend/README.md)
+├── scripts/            launcher.mjs + network.mjs: run the cluster, kill/revive nodes, inject delay and partitions
+├── docs/               ARCHITECTURE.md (how it works), DEMO.md (guided tour)
+├── Dockerfile          Node image (see "Docker")
+├── docker-compose.yml  3-node cluster, fixed IPs (untested)
 └── init-nested-submodules.sh
 ```
 
@@ -84,6 +86,46 @@ term, and indices; `curl 127.0.0.1:8101/status` returns the same as JSON. Kill
 the leader (`Ctrl-C` or `kill -9`), watch another node take over within a few
 hundred ms, restart it, and it catches up. Add `--no-repl` to run headless until
 SIGINT/SIGTERM. Peer hosts must be IPv4 addresses.
+
+### Dashboard
+
+```bash
+npm --prefix frontend install
+node scripts/launcher.mjs --fresh      # 3 nodes + the kill/revive launcher
+npm --prefix frontend run dev          # http://localhost:5173
+```
+
+Open it on a phone too: `npm --prefix frontend run dev:host` prints a LAN address (run
+the launcher with `--host 0.0.0.0` so that phone can reach it). Details and the design
+choices are in [frontend/README.md](frontend/README.md).
+
+The launcher can break the real cluster on purpose: **Kill** is a `SIGKILL`, **Isolate**
+cuts a node off from its peers (it keeps running), and the **delay** slider slows every
+node-to-node link. Node-to-node traffic goes through proxies the launcher owns
+(`--no-network` turns that off; `--public-host` sets the host used in redirect links).
+Follow [docs/DEMO.md](docs/DEMO.md) for a ten-minute guided tour, and
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for how and why it works.
+
+### Docker (untested)
+
+`docker-compose.yml` runs the three nodes as containers with fixed IPs (the nodes'
+HTTP client needs dotted-IPv4 peers) and publishes `8101`-`8103`, so the dashboard works
+unchanged:
+
+```bash
+docker compose up --build              # first build compiles the backend
+docker compose kill node-2             # crash a node
+docker compose start node-2            # revive it from its volume
+docker network disconnect raftkv-net raftkv-node-2   # cut it off
+docker compose down -v                 # stop and delete the data
+```
+
+**This has not been run by its author** (no container runtime was available while
+writing it). What *was* checked: the compose file parses, every node's argument list is
+accepted by the real binary, the `ENTRYPOINT` passes arguments through intact, and the
+Dockerfile's CMake flags drop the test target. The dashboard's Kill / Revive / Isolate
+buttons need the launcher and stay disabled with Docker. Also note the template's
+`init-nested-submodules.sh` clones each library's default branch, not the pinned commit.
 
 ### Client API
 

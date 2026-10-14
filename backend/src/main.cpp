@@ -13,7 +13,9 @@
  * `GET /events` (this node) and `GET /cluster/events` (whole cluster, pushed on
  * change). `--cors-origin ORIGIN` lets a dashboard on another origin read them;
  * `--threads N` sizes the server pool (each open stream pins one thread; the
- * stream cap is half of it).
+ * stream cap is half of it). `--public-url ID=URL` tells a node the address clients
+ * (not peers) should use for peer ID, which followers put in their 307 redirects;
+ * needed when --peer points at a proxy or a container-internal address.
  *
  * Clients use HTTP on the same port: `PUT|GET|DELETE /kv/<percent-encoded key>`
  * (followers answer 307 -> leader; `GET ...?stale=1` reads the local map) and
@@ -40,6 +42,8 @@
 #include <sstream>  // std::istringstream
 #include <string>   // std::string
 #include <thread>   // std::this_thread::sleep_for
+#include <utility>  // std::pair - parsed --public-url entries
+#include <vector>   // std::vector - those entries
 // clang-format on
 
 namespace {
@@ -78,7 +82,7 @@ void printUsage() {
     std::fprintf(stderr,
                  "usage: raftkv_backend [--id ID] [--data DIR] [--port PORT] "
                  "[--peer ID=HOST:PORT]... [--rate-limit N] [--max-value-bytes N] "
-                 "[--threads N] [--cors-origin ORIGIN] [--no-repl]\n");
+                 "[--threads N] [--cors-origin ORIGIN] [--public-url ID=URL]... [--no-repl]\n");
 }
 
 } // namespace
@@ -86,6 +90,7 @@ void printUsage() {
 int main(int argc, char** argv) {
     RaftKV::Node::KvNodeConfig config;
     RaftKV::Net::NodeServerOptions serverOptions;
+    std::vector<std::pair<std::string, std::string>> publicUrls; // peer id -> client URL
     uint16_t port = 0;
     bool repl = true;
 
@@ -138,10 +143,32 @@ int main(int argc, char** argv) {
             serverOptions.threadCount = threads;
         } else if (arg == "--cors-origin" && hasValue) {
             serverOptions.corsOrigin = argv[++i];
+        } else if (arg == "--public-url" && hasValue) {
+            const std::string text = argv[++i];
+            const std::size_t equals = text.find('=');
+            if (equals == std::string::npos || equals == 0 || equals + 1 == text.size()) {
+                std::fprintf(stderr, "bad --public-url (expected ID=URL): %s\n", text.c_str());
+                return 2;
+            }
+            publicUrls.emplace_back(text.substr(0, equals), text.substr(equals + 1));
         } else if (arg == "--no-repl") {
             repl = false;
         } else {
             printUsage();
+            return 2;
+        }
+    }
+
+    for (const auto& [id, url] : publicUrls) {
+        bool known = false;
+        for (RaftKV::Net::PeerAddress& peer : config.peers) {
+            if (peer.id == id) {
+                peer.publicUrl = url;
+                known = true;
+            }
+        }
+        if (!known) {
+            std::fprintf(stderr, "--public-url names %s, which is not a --peer\n", id.c_str());
             return 2;
         }
     }

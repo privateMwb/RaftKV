@@ -51,7 +51,9 @@ struct TransportOptions {
     std::chrono::milliseconds perKiBTimeout{1};
     /// Most RPCs queued for one peer. When full, the oldest is dropped:
     /// Raft treats a lost RPC like any other loss and resends on its own.
-    std::size_t maxQueuedPerPeer = 16;
+    /// Kept small on purpose: a deep queue of stale heartbeats ahead of a new
+    /// entry is latency (each one costs a full round trip) for no benefit.
+    std::size_t maxQueuedPerPeer = 4;
 };
 
 /**
@@ -60,7 +62,8 @@ struct TransportOptions {
  *
  * @details RaftNode calls the transport from inside its (mutex-held) tick(),
  * and is not allowed to block there, so a send only enqueues work. Each peer
- * has its own sender thread and queue: RPCs to one peer stay in order, a slow
+ * has its own sender thread and queue: RPCs to one peer stay in order (except
+ * that a newer AppendEntries replaces an older one still waiting its turn), a slow
  * or dead peer can't delay the others, and at most one call per peer is ever
  * in flight. The sender does the blocking HTTP call, decodes the reply, and
  * hands the RaftCore reply callback to the `runner` supplied at construction,
@@ -88,7 +91,14 @@ class HttpTransport final : public RaftCore::Transport {
         PeerAddress address;
         std::mutex mutex;
         std::condition_variable wake;
-        std::deque<FunctionPro::MoveOnlyFunction<void()>> queue;
+        /// One queued RPC. `supersedable` ones (AppendEntries) are replaced by a
+        /// newer one for the same peer: the newer message carries everything the
+        /// older one did, so sending both only delays the one that matters.
+        struct Pending {
+            FunctionPro::MoveOnlyFunction<void()> task;
+            bool supersedable = false;
+        };
+        std::deque<Pending> queue;
         bool stopping = false;
         std::thread thread;
     };
@@ -100,7 +110,8 @@ class HttpTransport final : public RaftCore::Transport {
     std::unordered_map<std::string, std::unique_ptr<PeerSender>> senders_;
 
     [[nodiscard]] FalconHTTP::Client::HttpClient clientFor(std::size_t bodyBytes) const;
-    void enqueue(const RaftCore::NodeId& target, FunctionPro::MoveOnlyFunction<void()> task);
+    void enqueue(const RaftCore::NodeId& target, FunctionPro::MoveOnlyFunction<void()> task,
+                 bool supersedable = false);
     void senderLoop(PeerSender& sender);
 
   public:

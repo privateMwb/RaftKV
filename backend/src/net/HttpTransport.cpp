@@ -98,17 +98,24 @@ FalconHTTP::Client::HttpClient HttpTransport::clientFor(std::size_t bodyBytes) c
 //  Section 2 — Enqueueing
 // ============================================================
 
-void HttpTransport::enqueue(const NodeId& target, FunctionPro::MoveOnlyFunction<void()> task) {
+void HttpTransport::enqueue(const NodeId& target, FunctionPro::MoveOnlyFunction<void()> task,
+                            bool supersedable) {
     PeerSender& sender = *senders_.at(target);
     {
         std::lock_guard lock(sender.mutex);
         if (sender.stopping)
             return;
 
+        // A newer AppendEntries makes any not-yet-sent older one pointless. Without
+        // this, when a round trip takes longer than the heartbeat interval, a new
+        // entry would wait behind a backlog of stale heartbeats.
+        if (supersedable)
+            std::erase_if(sender.queue, [](const PeerSender::Pending& p) { return p.supersedable; });
+
         if (sender.queue.size() >= options_.maxQueuedPerPeer)
             sender.queue.pop_front(); // Oldest is the stalest; Raft will resend.
 
-        sender.queue.push_back(std::move(task));
+        sender.queue.push_back(PeerSender::Pending{std::move(task), supersedable});
     }
     sender.wake.notify_one();
 }
@@ -126,7 +133,7 @@ void HttpTransport::senderLoop(PeerSender& sender) {
             if (sender.stopping)
                 return;
 
-            task = std::move(sender.queue.front());
+            task = std::move(sender.queue.front().task);
             sender.queue.pop_front();
         }
 
@@ -194,7 +201,7 @@ Status HttpTransport::sendAppendEntries(const NodeId& target, AppendEntriesArgs 
             onReply(*reply);
         };
         runner_(deliver);
-    });
+    }, /*supersedable=*/true);
 
     return Status::OK;
 }

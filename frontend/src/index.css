@@ -2,10 +2,78 @@
 @import "boxicons/css/boxicons.min.css";
 
 /*
- * Global styles beyond utility classes go here -- e.g. @theme
- * customization (Tailwind v4's replacement for tailwind.config.js
- * theme.extend), or the rare base-element override that isn't
- * worth repeating as a utility class everywhere.
- *
- * See: https://tailwindcss.com/docs/theme
+ * RaftKV dashboard theme (Tailwind v4 @theme). Colour names describe the job a colour
+ * does in the UI, not its hue, so `text-leader` / `bg-panel` read the same everywhere.
  */
+@theme {
+  --font-sans: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --color-ink: #07090c; /* page background */
+  --color-panel: #0d1117; /* panels */
+  --color-card: #0b1016; /* node cards */
+  --color-cell: #10161e; /* stat cells, inputs */
+  --color-line: #1c232d; /* hairlines */
+  --color-line-2: #243040; /* stronger borders */
+  --color-fg: #e6edf3;
+  --color-dim: #a7b6c8;
+  --color-mute: #8494a7;
+
+  --color-leader: #22d3ee;
+  --color-follower: #94a3b8;
+  --color-candidate: #fbbf24;
+  --color-down: #fb7185;
+  --color-ok: #34d399;
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    background: var(--color-ink);
+    color: var(--color-fg);
+    font-family: var(--font-sans);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-leader);
+    outline-offset: 2px;
+  }
+}
+
+/* Heartbeat flowing from the leader along each link. */
+@keyframes flow {
+  to {
+    stroke-dashoffset: -16;
+  }
+}
+
+@keyframes ping-ring {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-leader) 55%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 8px transparent;
+  }
+}
+
+@utility animate-flow {
+  animation: flow 1s linear infinite;
+}
+
+@utility animate-ping-ring {
+  animation: ping-ring 1.6s ease-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-flow,
+  .animate-ping-ring,
+  .bx-spin {
+    animation: none !important;
+  }
+}

@@ -79,6 +79,19 @@ built as the `raftkv_core` static library, shared by `raftkv_backend` and
   thread until the client leaves (noticed on the next send, at most one
   keep-alive away) or the node stops (`NodeServer::stop()` wakes them all).
   `--threads` sizes the pool; at most half may be streams.
+- **Peer address vs public URL.** `--peer` is the address *nodes* use to reach each
+  other, which may be a proxy or a container-internal IP. A follower's `307` must point
+  a *client* at the leader, so `--public-url ID=URL` supplies that address per peer
+  (default: the peer address). Without it, redirects led clients to the proxy.
+- **One `AppendEntries` in flight per peer, latest wins.** A newer `AppendEntries`
+  replaces one still waiting in that peer's queue (it carries everything the older one
+  did); votes are never replaced. Without this, when a round trip outlasts the
+  heartbeat interval a new entry waited behind a backlog of stale heartbeats.
+- **Latency budget.** Because only one RPC per peer is in flight, heartbeats cannot
+  arrive faster than one per round trip. With the default 150–300 ms election timeout,
+  a one-way delay of about 80 ms or more (round trip above 150 ms) causes constant
+  elections; 40 ms is fine. Safety is unaffected, availability is. Raise the election
+  timeout for slower networks.
 - **Restart replays from index 1.** RaftCore's `lastApplied` is volatile; the
   map is rebuilt from the WAL once the new term's no-op commits.
 

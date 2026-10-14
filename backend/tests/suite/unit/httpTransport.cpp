@@ -260,19 +260,110 @@ static void per_peer_order_preserved() {
     HttpTransport transport({{"peer", "127.0.0.1", 18853}}, runner.runner());
 
     std::atomic<int> delivered{0};
-    for (Term term = 1; term <= 6; ++term) {
+    // A burst has to fit the default queue of 4 (a deeper one drops the oldest).
+    for (Term term = 1; term <= 4; ++term) {
         RequestVoteArgs args;
         args.term = term;
         CHK(transport.sendRequestVote("peer", args, [&](RequestVoteReply) { ++delivered; }) ==
             Status::OK);
     }
 
-    CHK(waitFor(delivered, 6, 5s));
+    CHK(waitFor(delivered, 4, 5s));
 
     std::lock_guard lock(orderMutex);
-    CHK(order.size() == 6);
+    CHK(order.size() == 4);
     for (std::size_t i = 0; i < order.size(); ++i)
         CHK(order[i] == i + 1);
+}
+
+// Verifies a newer AppendEntries replaces older ones still waiting for their turn,
+// so a new entry never queues behind a backlog of stale heartbeats.
+static void newer_append_supersedes_queued() {
+    StubPeer peer(18860);
+    std::mutex seenMutex;
+    std::vector<Term> seen;
+    peer.router().post(kAppendEntriesPath, [&](const HttpRequest& request, HttpResponse& response) {
+        if (const auto args = decodeAppendEntriesArgs(request.body())) {
+            std::lock_guard lock(seenMutex);
+            seen.push_back(args->term);
+        }
+        std::this_thread::sleep_for(250ms); // a slow link: each round trip is long
+        AppendEntriesReply reply;
+        reply.term = 1;
+        response.setStatus(HttpStatus::Ok);
+        response.setBody(encode(reply));
+    });
+    CHK(peer.start());
+
+    CountingRunner runner;
+    TransportOptions options;
+    options.ioTimeout = 3000ms;
+    HttpTransport transport({{"peer", "127.0.0.1", 18860}}, runner.runner(), options);
+
+    std::atomic<int> delivered{0};
+    for (Term term = 1; term <= 5; ++term) {
+        AppendEntriesArgs args;
+        args.term = term;
+        args.leaderId = "n";
+        CHK(transport.sendAppendEntries("peer", args, [&](AppendEntriesReply) { ++delivered; }) ==
+            Status::OK);
+        // The first is picked up at once and is then in flight; 2..5 queue behind it.
+        std::this_thread::sleep_for(term == 1 ? 80ms : 5ms);
+    }
+
+    CHK(waitFor(delivered, 2, 5s));
+    std::this_thread::sleep_for(400ms); // nothing else may arrive
+
+    std::lock_guard lock(seenMutex);
+    CHK(seen.size() == 2);
+    if (seen.size() == 2) {
+        CHK(seen[0] == 1); // the one already in flight
+        CHK(seen[1] == 5); // only the newest of the rest
+    }
+}
+
+// Verifies votes are never dropped in favour of a newer AppendEntries.
+static void votes_are_not_superseded() {
+    StubPeer peer(18861);
+    std::mutex seenMutex;
+    int votes = 0;
+    peer.router().post(kRequestVotePath, [&](const HttpRequest&, HttpResponse& response) {
+        {
+            std::lock_guard lock(seenMutex);
+            ++votes;
+        }
+        std::this_thread::sleep_for(100ms);
+        RequestVoteReply reply;
+        response.setStatus(HttpStatus::Ok);
+        response.setBody(encode(reply));
+    });
+    peer.router().post(kAppendEntriesPath, [](const HttpRequest&, HttpResponse& response) {
+        std::this_thread::sleep_for(100ms);
+        AppendEntriesReply reply;
+        response.setStatus(HttpStatus::Ok);
+        response.setBody(encode(reply));
+    });
+    CHK(peer.start());
+
+    CountingRunner runner;
+    TransportOptions options;
+    options.ioTimeout = 3000ms;
+    HttpTransport transport({{"peer", "127.0.0.1", 18861}}, runner.runner(), options);
+
+    std::atomic<int> delivered{0};
+    CHK(transport.sendAppendEntries("peer", AppendEntriesArgs(), [&](AppendEntriesReply) { ++delivered; }) ==
+        Status::OK); // in flight
+    std::this_thread::sleep_for(30ms);
+    CHK(transport.sendRequestVote("peer", RequestVoteArgs{}, [&](RequestVoteReply) { ++delivered; }) ==
+        Status::OK);
+    CHK(transport.sendRequestVote("peer", RequestVoteArgs{}, [&](RequestVoteReply) { ++delivered; }) ==
+        Status::OK);
+    CHK(transport.sendAppendEntries("peer", AppendEntriesArgs(), [&](AppendEntriesReply) { ++delivered; }) ==
+        Status::OK);
+
+    CHK(waitFor(delivered, 4, 5s));
+    std::lock_guard lock(seenMutex);
+    CHK(votes == 2);
 }
 
 // Verifies the I/O timeout stretches with the body size: the same 450 ms
@@ -388,6 +479,8 @@ static void run_tests() {
     RUN(ack_observer_sees_reply);
     RUN(append_args_arrive_intact);
     RUN(per_peer_order_preserved);
+    RUN(newer_append_supersedes_queued);
+    RUN(votes_are_not_superseded);
     RUN(timeout_scales_with_body);
     RUN(unknown_peer_not_found);
     RUN(dead_peer_is_silent);

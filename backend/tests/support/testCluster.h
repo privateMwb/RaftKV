@@ -32,8 +32,12 @@ class TestCluster {
     /// @param size Number of nodes.
     /// @param basePort Node i listens on basePort + i.
     /// @param api Client API limits/timeouts every node's server uses.
-    TestCluster(int size, uint16_t basePort, RaftKV::Net::ClientApiConfig api = defaultApi())
-        : basePort_(basePort) {
+    /// @param publicHost If set, every peer is also given a `publicUrl` on this host
+    /// (e.g. "localhost"), so tests can tell a redirect built from it apart from one
+    /// built from the peer address (127.0.0.1).
+    TestCluster(int size, uint16_t basePort, RaftKV::Net::ClientApiConfig api = defaultApi(),
+                std::string publicHost = std::string())
+        : basePort_(basePort), publicHost_(std::move(publicHost)) {
         serverOptions_.threadCount = 8; // room for SSE streams (cap = half) plus RPC/client traffic
         serverOptions_.api = api;
         serverOptions_.monitor.pollInterval = Ms(100); // snappy cluster view without loading a 1-core box
@@ -202,12 +206,16 @@ class TestCluster {
 
         for (int j = 0; j < size; ++j)
             if (j != i)
-                config.peers.push_back({"node-" + std::to_string(j + 1), "127.0.0.1", portOf(j)});
+                config.peers.push_back({"node-" + std::to_string(j + 1), "127.0.0.1", portOf(j),
+                                        publicHost_.empty()
+                                            ? std::string()
+                                            : "http://" + publicHost_ + ":" + std::to_string(portOf(j)) + "/"});
 
         return config;
     }
 
     uint16_t basePort_;
+    std::string publicHost_;
     RaftKV::Net::NodeServerOptions serverOptions_;
     TempDir root_;
     std::vector<Slot> slots_;

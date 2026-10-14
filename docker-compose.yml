@@ -1,0 +1,116 @@
+# A 3-node RaftKV cluster, one container per node.
+#
+#   docker compose up --build          start (first build compiles the backend: slow)
+#   docker compose kill node-2         crash a node (a real kill -9)
+#   docker compose start node-2        bring it back; it recovers from its volume
+#   docker network disconnect raftkv-net raftkv-node-2     cut a node off (a partition)
+#   docker network connect --ip 172.28.0.12 raftkv-net raftkv-node-2     heal it
+#   docker compose down -v             stop and delete all data
+#
+# The dashboard (frontend/) talks to the published ports on localhost, so it works
+# unchanged; its Kill / Revive / Isolate buttons need the launcher script and stay
+# disabled here: use the commands above instead.
+#
+# Peers are given as dotted IPv4 addresses on a fixed-subnet network because the
+# node's HTTP client does not resolve hostnames.
+
+name: raftkv
+
+x-node: &node
+  build: .
+  image: raftkv:local
+  restart: "no"
+
+networks:
+  raftkv:
+    name: raftkv-net
+    ipam:
+      config:
+        - subnet: 172.28.0.0/24
+
+volumes:
+  node-1-data:
+  node-2-data:
+  node-3-data:
+
+services:
+  node-1:
+    <<: *node
+    container_name: raftkv-node-1
+    command:
+      - --id
+      - "node-1"
+      - --port
+      - "8101"
+      - --data
+      - "/app/data"
+      - --no-repl
+      - --cors-origin
+      - "*"
+      - --peer
+      - "node-2=172.28.0.12:8102"
+      - --peer
+      - "node-3=172.28.0.13:8103"
+      - --public-url
+      - "node-2=http://localhost:8102"
+      - --public-url
+      - "node-3=http://localhost:8103"
+    ports: ["8101:8101"]
+    volumes: ["node-1-data:/app/data"]
+    networks:
+      raftkv:
+        ipv4_address: 172.28.0.11
+
+  node-2:
+    <<: *node
+    container_name: raftkv-node-2
+    command:
+      - --id
+      - "node-2"
+      - --port
+      - "8102"
+      - --data
+      - "/app/data"
+      - --no-repl
+      - --cors-origin
+      - "*"
+      - --peer
+      - "node-1=172.28.0.11:8101"
+      - --peer
+      - "node-3=172.28.0.13:8103"
+      - --public-url
+      - "node-1=http://localhost:8101"
+      - --public-url
+      - "node-3=http://localhost:8103"
+    ports: ["8102:8102"]
+    volumes: ["node-2-data:/app/data"]
+    networks:
+      raftkv:
+        ipv4_address: 172.28.0.12
+
+  node-3:
+    <<: *node
+    container_name: raftkv-node-3
+    command:
+      - --id
+      - "node-3"
+      - --port
+      - "8103"
+      - --data
+      - "/app/data"
+      - --no-repl
+      - --cors-origin
+      - "*"
+      - --peer
+      - "node-1=172.28.0.11:8101"
+      - --peer
+      - "node-2=172.28.0.12:8102"
+      - --public-url
+      - "node-1=http://localhost:8101"
+      - --public-url
+      - "node-2=http://localhost:8102"
+    ports: ["8103:8103"]
+    volumes: ["node-3-data:/app/data"]
+    networks:
+      raftkv:
+        ipv4_address: 172.28.0.13

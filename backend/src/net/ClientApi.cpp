@@ -112,10 +112,17 @@ void ClientApi::redirectToLeader(const HttpRequest& request, HttpResponse& respo
         return;
     }
 
+    // The address peers use may not be one a client can reach (proxy, container IP),
+    // so prefer the node's configured public URL.
+    std::string base = leader->publicUrl.empty()
+                           ? "http://" + leader->host + ":" + std::to_string(leader->port)
+                           : leader->publicUrl;
+    while (!base.empty() && base.back() == '/')
+        base.pop_back();
+
     // 307 (unlike 302) obliges the client to repeat the same method and body.
     response.setStatus(HttpStatus::TemporaryRedirect);
-    response.setHeader("Location",
-                       "http://" + leader->host + ":" + std::to_string(leader->port) + request.path());
+    response.setHeader("Location", base + request.path());
     response.setHeader("Content-Type", "text/plain");
     response.setBody("not the leader; redirecting to " + leader->id);
 }

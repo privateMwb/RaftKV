@@ -9,7 +9,11 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "node --test --test-reporter=spec \"tests/**/*.test.ts\" \"../scripts/tests/*.test.mjs\"",
+    "launcher": "node ../scripts/launcher.mjs",
+    "test:e2e": "node --test --test-reporter=spec tests/e2e.test.ts",
+    "dev:host": "vite --host"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",

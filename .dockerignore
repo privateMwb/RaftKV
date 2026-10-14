@@ -1,0 +1,12 @@
+# The node image needs only the backend and the submodule bootstrap script.
+.git
+.github
+docs
+frontend
+scripts
+**/node_modules
+**/build
+**/dist
+backend/data
+*.wal
+*.state
