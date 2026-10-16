@@ -197,7 +197,7 @@ int main(int argc, char** argv) {
     node.start();
 
     if (!repl) {
-        struct sigaction action{};
+        struct sigaction action {};
         action.sa_handler = onSignal;
         sigaction(SIGINT, &action, nullptr);
         sigaction(SIGTERM, &action, nullptr);
