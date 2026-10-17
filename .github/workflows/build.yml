@@ -64,3 +64,10 @@ jobs:
       - name: Build
         working-directory: backend
         run: cmake --build build-${{ matrix.compiler }}-${{ matrix.build_type }} --config ${{ matrix.build_type }}
+
+      # Runs every unit and integration suite, including real multi-node
+      # clusters. The runner exits non-zero if any test fails.
+      - name: Test
+        working-directory: backend
+        timeout-minutes: 10
+        run: ./build-${{ matrix.compiler }}-${{ matrix.build_type }}/raftkv_tests

@@ -61,9 +61,8 @@ FalconHTTP::Config::ServerConfig makeServerConfig(const NodeServerOptions& optio
 } // namespace
 
 NodeServer::NodeServer(Node::KvNode& node, uint16_t port, NodeServerOptions options)
-    : node_(node), router_(), options_(std::move(options)),
-      server_(router_, makeServerConfig(options_)), api_(node, options_.api),
-      monitor_(node, options_.monitor), port_(port) {
+    : node_(node), router_(), options_(std::move(options)), api_(node, options_.api),
+      monitor_(node, options_.monitor), port_(port), server_(router_, makeServerConfig(options_)) {
     registerRoutes();
 
     // Order matters: CORS first so its headers (and OPTIONS preflight answers)

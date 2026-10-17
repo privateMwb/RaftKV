@@ -1,23 +1,23 @@
 # ============================================================
 # .github/workflows/sanitizers.yml
-# Boots app_backend under AddressSanitizer+
-# UndefinedBehaviorSanitizer, and separately under
-# ThreadSanitizer, to catch memory/UB and data-race issues.
+# Builds the backend with AddressSanitizer + UndefinedBehaviorSanitizer,
+# and separately with ThreadSanitizer, then runs the whole test suite
+# (unit and integration, including real multi-node clusters) plus a
+# smoke test of a real node under each one.
 #
-# TODO: this is a boot-only smoke test out of the box, since
-# this template's backend/src/sample.cpp has no real endpoints
-# yet. Once the app has real request handlers -- especially
-# anything concurrency-sensitive (shared state behind a lock,
-# atomics, a check-then-act critical section) -- replace the
-# "run briefly" step below with real requests against those
-# endpoints, fired concurrently for the tsan job specifically.
-# ThreadSanitizer only reports what actually gets exercised, so
-# a boot-only run won't catch a data race that only occurs on a
-# real code path being hit.
+# The smoke test (scripts/ci-smoke.sh) boots raftkv_backend, writes and
+# reads keys, fires a burst of concurrent writes, opens the event
+# stream, and shuts the node down with SIGTERM. ThreadSanitizer only
+# reports what actually gets exercised, which is why the tests and the
+# concurrent burst matter more than merely booting the binary.
 #
 # ASan+UBSan can share one binary; ThreadSanitizer cannot be
 # combined with ASan in the same build, hence two separate
 # configure/build passes below.
+#
+# A sanitizer report fails the job: every sanitizer ends a report with a
+# "SUMMARY: ...Sanitizer" line, which the steps below look for in
+# addition to the process exit code.
 # ============================================================
 
 name: Sanitizers
@@ -53,42 +53,27 @@ jobs:
         working-directory: backend
         run: cmake --build build
 
-      - name: Run briefly and check for sanitizer errors
+      - name: Lower ASLR entropy (sanitizers can abort at startup without this)
+        run: sudo sysctl -q vm.mmap_rnd_bits=28 || true
+
+      - name: Run the test suite under ASan + UBSan
         working-directory: backend
         env:
-          ASAN_OPTIONS: detect_leaks=1:halt_on_error=0
-          UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=0
+          ASAN_OPTIONS: detect_leaks=1:halt_on_error=1
+          UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
         run: |
-          mkdir -p data
-          ./build/app_backend > app.log 2>&1 &
-          APP_PID=$!
-
-          # TODO: replace this fixed sleep with polling a real
-          # readiness endpoint once one exists (e.g. curl a
-          # /health route in a retry loop), and add real requests
-          # here to actually exercise the app's code paths.
-          sleep 5
-
-          kill -TERM "$APP_PID" 2>/dev/null || true
-
-          # Bounded wait, not `wait "$APP_PID"` alone -- if the
-          # process is hung, SIGTERM may never be processed, and
-          # an unbounded wait would hang this job indefinitely.
-          for i in $(seq 1 10); do
-            if ! kill -0 "$APP_PID" 2>/dev/null; then
-              break
-            fi
-            sleep 1
-          done
-          kill -KILL "$APP_PID" 2>/dev/null || true
-          wait "$APP_PID" 2>/dev/null || true
-
-          cat app.log
-
-          if grep -qE "ERROR: (AddressSanitizer|UndefinedBehaviorSanitizer)" app.log; then
-            echo "Sanitizer reported an error -- see log above."
+          set -o pipefail
+          ./build/raftkv_tests 2>&1 | tee tests.log
+          if grep -qE "SUMMARY: [A-Za-z]*Sanitizer|runtime error:" tests.log; then
+            echo "A sanitizer reported an error -- see log above."
             exit 1
           fi
+
+      - name: Smoke test a real node under ASan + UBSan
+        env:
+          ASAN_OPTIONS: detect_leaks=1:halt_on_error=1
+          UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
+        run: scripts/ci-smoke.sh backend/build/raftkv_backend
 
   tsan:
     runs-on: ubuntu-latest
@@ -119,37 +104,22 @@ jobs:
         working-directory: backend
         run: cmake --build build
 
-      - name: Run briefly and check for data races
+      - name: Lower ASLR entropy (sanitizers can abort at startup without this)
+        run: sudo sysctl -q vm.mmap_rnd_bits=28 || true
+
+      - name: Run the test suite under TSan
         working-directory: backend
         env:
           TSAN_OPTIONS: halt_on_error=0
         run: |
-          mkdir -p data
-          ./build/app_backend > app.log 2>&1 &
-          APP_PID=$!
-
-          # TODO: TSan instrumentation is slow to boot -- once a
-          # real readiness endpoint exists, poll it here instead
-          # of sleeping blind, then fire several requests
-          # concurrently against whatever code path actually
-          # holds a lock or touches shared/atomic state, so TSan
-          # has something real to observe.
-          sleep 10
-
-          kill -TERM "$APP_PID" 2>/dev/null || true
-
-          for i in $(seq 1 10); do
-            if ! kill -0 "$APP_PID" 2>/dev/null; then
-              break
-            fi
-            sleep 1
-          done
-          kill -KILL "$APP_PID" 2>/dev/null || true
-          wait "$APP_PID" 2>/dev/null || true
-
-          cat app.log
-
-          if grep -q "WARNING: ThreadSanitizer" app.log; then
+          set -o pipefail
+          ./build/raftkv_tests 2>&1 | tee tests.log
+          if grep -qE "WARNING: ThreadSanitizer|SUMMARY: ThreadSanitizer" tests.log; then
             echo "ThreadSanitizer reported a data race -- see log above."
             exit 1
           fi
+
+      - name: Smoke test a real node under TSan
+        env:
+          TSAN_OPTIONS: halt_on_error=0
+        run: scripts/ci-smoke.sh backend/build/raftkv_backend

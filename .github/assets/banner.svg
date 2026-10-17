@@ -1,63 +1,126 @@
-<!--
-  Retargeting: this banner is a template asset — replace the two
-  <text> strings below ("PROJECT_NAME" and the tagline) with the real
-  project name and a one-line tagline once retargeted. Everything else
-  (gradients, grid, glow filter) is generic and doesn't need editing.
--->
-<svg width="1200" height="280" viewBox="0 0 1200 280" xmlns="http://www.w3.org/2000/svg">
+<svg width="1200" height="300" viewBox="0 0 1200 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="RaftKV: distributed key-value store with a live Raft dashboard" xmlns:c2pa="http://c2pa.org/manifest"><metadata><c2pa:manifest>AAAWgmp1bWIAAAAeanVtZGMycGEAEQAQgAAAqgA4m3EDYzJwYQAAABZcanVtYgAAAEdqdW1kYzJtYQARABCAAACqADibcQN1cm46YzJwYToyZmZmMDJiNi0xODZlLTQ5MzctYjdiNS0xNzJiY2JiNGI0OTIAAAADl2p1bWIAAAApanVtZGMyYXMAEQAQgAAAqgA4m3EDYzJwYS5hc3NlcnRpb25zAAAAALxqdW1iAAAARGp1bWRjYm9yABEAEIAAAKoAOJtxE2MycGEuaW5ncmVkaWVudC52MwAAAAAYYzJzaHGx2wh0fVD681qZD2mGQPkAAABwY2JvcqNpZGM6Zm9ybWF0bWltYWdlL3N2Zyt4bWxqaW5zdGFuY2VJRHgseG1wOmlpZDpiYzI0YmIwNi0zMDBmLTRiZGMtYTcxYi0yMWRiNDA3NGQ0YmRscmVsYXRpb25zaGlwaHBhcmVudE9mAAAB4mp1bWIAAABBanVtZGNib3IAEQAQgAAAqgA4m3ETYzJwYS5hY3Rpb25zLnYyAAAAABhjMnNohK/B8Z+95FQcB4JxTxAx2AAAAZljYm9yomdhY3Rpb25zgqJmYWN0aW9ua2MycGEub3BlbmVkanBhcmFtZXRlcnOha2luZ3JlZGllbnRzgaJjdXJseC1zZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmluZ3JlZGllbnQudjNkaGFzaFgg3SDWlxs8HJZufNViYSILhHOIoEMNVns3iA+HRWQwu2mkZmFjdGlvbngdY29tLmFudGhyb3BpYy5jbGF1ZGUucHJvdmlkZWRqcGFyYW1ldGVyc6F4H2NvbS5hbnRocm9waWMub3JpZ2luLWNvbmZpZGVuY2VndW5rbm93bmtkZXNjcmlwdGlvbnhmQ2xhdWRlIHByb3ZpZGVkIHRoaXMgZmlsZSBhdCB0aGUgcmVxdWVzdCBvZiBhIHVzZXIgYW5kIG1heSBoYXZlIGNyZWF0ZWQgb3IgbW9kaWZpZWQgdGhlIGZpbGUgY29udGVudHMubXNvZnR3YXJlQWdlbnShZG5hbWVmQ2xhdWRlcmFsbEFjdGlvbnNJbmNsdWRlZPUAAADIanVtYgAAAEBqdW1kY2JvcgARABCAAACqADibcRNjMnBhLmhhc2guZGF0YQAAAAAYYzJzaHIdejd2c54o+NCjw7WGRsUAAACAY2JvcqVjYWxnZnNoYTI1NmNwYWRNAAAAAAAAAAAAAAAAAGRoYXNoWCCqPOkS4VU/z94rL+T5+5HF/dLiHwQO4r+zn4tUXBnXUWRuYW1lbmp1bWJmIG1hbmlmZXN0amV4Y2x1c2lvbnOBomVzdGFydBjvZmxlbmd0aBkeBAAAAj5qdW1iAAAAJ2p1bWRjMmNsABEAEIAAAKoAOJtxA2MycGEuY2xhaW0udjIAAAACD2Nib3KlY2FsZ2ZzaGEyNTZpc2lnbmF0dXJleE1zZWxmI2p1bWJmPS9jMnBhL3VybjpjMnBhOjJmZmYwMmI2LTE4NmUtNDkzNy1iN2I1LTE3MmJjYmI0YjQ5Mi9jMnBhLnNpZ25hdHVyZWppbnN0YW5jZUlEeCx4bXA6aWlkOjNlY2U5NzZlLTMyM2UtNDE5My1iNDY1LTBhYWZlNjM5NDUzYnJjcmVhdGVkX2Fzc2VydGlvbnODomN1cmx4LXNlbGYjanVtYmY9YzJwYS5hc3NlcnRpb25zL2MycGEuaW5ncmVkaWVudC52M2RoYXNoWCDdINaXGzwclm581WJhIguEc4igQw1WezeID4dFZDC7aaJjdXJseCpzZWxmI2p1bWJmPWMycGEuYXNzZXJ0aW9ucy9jMnBhLmFjdGlvbnMudjJkaGFzaFggcyCuBNZQ9pDizMz/UKoIknjZdBUv3g0dWTTjAEIUtcGiY3VybHgpc2VsZiNqdW1iZj1jMnBhLmFzc2VydGlvbnMvYzJwYS5oYXNoLmRhdGFkaGFzaFggLZpqX5yX0ql2JRBTN0Pq9XR1N5c9T7/Z5Tw34bQeGxh0Y2xhaW1fZ2VuZXJhdG9yX2luZm+jZG5hbWVvQW50aHJvcGljIEZpbGVzZ3ZlcnNpb25lMS4wLjBrc3BlY1ZlcnNpb25lMi40LjAAABA4anVtYgAAAChqdW1kYzJjcwARABCAAACqADibcQNjMnBhLnNpZ25hdHVyZQAAABAIY2JvctKEWQISogEmGCFZAgowggIGMIIBjaADAgECAhRA5aAK7sI50L64g/oGQgU9Z1UTADAKBggqhkjOPQQDAzBJMRcwFQYDVQQKEw5BbnRocm9waWMsIFBCQzEuMCwGA1UEAxMlQW50aHJvcGljIENvbnRlbnQgQ3JlZGVudGlhbHMgUm9vdCBDQTAeFw0yNjA4MDcxODQzNTZaFw0yODA4MDYxOTQzNTZaMEQxFzAVBgNVBAoTDkFudGhyb3BpYywgUEJDMSkwJwYDVQQDEyBBbnRocm9waWMgQ2xhdWRlIENvbnRlbnQgU2lnbmluZzBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABJh6CmvLUBgFFNU0vUKlOVtE6djd17L5SuwX0LemFisBM3dkd/3cyjxFA3Qo5S46fX0/ihY0VZ7mfb9KF703t5OjWDBWMA4GA1UdDwEB/wQEAwIHgDAVBgNVHSUEDjAMBgorBgEEAYPoXgIBMAwGA1UdEwEB/wQCMAAwHwYDVR0jBBgwFoAUzlHiBIFOZFsj+OPEz5o+nMHXXMIwCgYIKoZIzj0EAwMDZwAwZAIwMXMdFJ4BetLLVY7ORuE9noqbbAZOZn/aArXyTwFAZfKrPzxF2vPoJNf1+UCdg1XGAjBwX1zd9WGqYkqmL5SFqw1QySjr1zJfpJM9+1rdDwSPLMOPOjKuiXjoU/pUUeG9RwmhY3BhZFkNngAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPZYQJ/zum9V34W/Jf012sC0tycmhSo7Hz5n2BEyhYU+OBXpISVyN8l7Y0uGDII8L9by7cKrc5lGEss2f3QOutJKW8Q=</c2pa:manifest></metadata>
   <defs>
     <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0A0E1A"/>
-      <stop offset="100%" stop-color="#0D1117"/>
+      <stop offset="0%" stop-color="#060B14"/>
+      <stop offset="100%" stop-color="#0B1220"/>
     </linearGradient>
-
-    <linearGradient id="titleGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#39D0D8"/>
-      <stop offset="50%" stop-color="#6E7BFF"/>
-      <stop offset="100%" stop-color="#B026FF"/>
+    <linearGradient id="title" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#2DD4BF"/>
+      <stop offset="100%" stop-color="#3B82F6"/>
     </linearGradient>
-
-    <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#39D0D8" stop-opacity="0"/>
-      <stop offset="50%" stop-color="#6E7BFF" stop-opacity="1"/>
-      <stop offset="100%" stop-color="#B026FF" stop-opacity="0"/>
+    <linearGradient id="rule" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#2DD4BF" stop-opacity="0.9"/>
+      <stop offset="60%" stop-color="#3B82F6" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#3B82F6" stop-opacity="0"/>
     </linearGradient>
-
-    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="6" result="blur"/>
-      <feMerge>
-        <feMergeNode in="blur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
-
-    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1C2333" stroke-width="1"/>
-    </pattern>
-
-    <radialGradient id="fade" cx="50%" cy="50%" r="60%">
-      <stop offset="0%" stop-color="#0D1117" stop-opacity="0"/>
-      <stop offset="100%" stop-color="#0D1117" stop-opacity="1"/>
+    <linearGradient id="link" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2DD4BF" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#3B82F6" stop-opacity="0.25"/>
+    </linearGradient>
+    <radialGradient id="glowBg" cx="76%" cy="50%" r="38%">
+      <stop offset="0%" stop-color="#2DD4BF" stop-opacity="0.16"/>
+      <stop offset="100%" stop-color="#2DD4BF" stop-opacity="0"/>
     </radialGradient>
+    <radialGradient id="vignette" cx="50%" cy="50%" r="75%">
+      <stop offset="60%" stop-color="#060B14" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#060B14" stop-opacity="0.85"/>
+    </radialGradient>
+    <pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="1.5" cy="1.5" r="1.1" fill="#16233A"/>
+    </pattern>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
   </defs>
 
-  <rect width="1200" height="280" fill="url(#bg)"/>
-  <rect width="1200" height="280" fill="url(#grid)"/>
-  <rect width="1200" height="280" fill="url(#fade)"/>
+  <!-- Background -->
+  <rect width="1200" height="300" fill="url(#bg)"/>
+  <rect width="1200" height="300" fill="url(#dots)"/>
+  <rect width="1200" height="300" fill="url(#glowBg)"/>
+  <rect width="1200" height="300" fill="url(#vignette)"/>
 
-  <text x="150" y="145" font-family="'Courier New', monospace" font-size="28"
-        fill="#6E7BFF" opacity="0.6">[</text>
-  <text x="1030" y="145" font-family="'Courier New', monospace" font-size="28"
-        fill="#B026FF" opacity="0.6">]</text>
+  <!-- Eyebrow: cluster status -->
+  <circle cx="86" cy="86" r="4.5" fill="#34D399">
+    <animate attributeName="opacity" values="1;0.25;1" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  <text x="102" y="90" font-family="'SF Mono','Cascadia Code',Consolas,'Courier New',monospace"
+        font-size="12" letter-spacing="2.5" fill="#64748B">3 NODES  ·  QUORUM  ·  LEADER ELECTED</text>
 
-  <text x="600" y="155" text-anchor="middle"
-        font-family="'Segoe UI', Helvetica, Arial, sans-serif"
-        font-size="72" font-weight="700" letter-spacing="4"
-        fill="url(#titleGradient)" filter="url(#glow)">PROJECT_NAME</text>
+  <!-- Title -->
+  <text x="80" y="170" font-family="'Segoe UI',Helvetica,Arial,sans-serif"
+        font-size="88" font-weight="800" letter-spacing="1" fill="url(#title)" filter="url(#glow)">RaftKV</text>
+  <rect x="82" y="188" width="360" height="3" rx="1.5" fill="url(#rule)"/>
 
-  <rect x="400" y="185" width="400" height="2" fill="url(#lineGradient)"/>
+  <!-- Tagline -->
+  <text x="82" y="224" font-family="'Segoe UI',Helvetica,Arial,sans-serif"
+        font-size="19" fill="#94A3B8">A replicated key-value store with a live Raft dashboard.</text>
 
-  <text x="600" y="220" text-anchor="middle"
-        font-family="'Segoe UI', Helvetica, Arial, sans-serif"
-        font-size="18" letter-spacing="2" fill="#8B92A8">TAGLINE GOES HERE</text>
+  <!-- Feature chips -->
+  <g font-family="'Segoe UI',Helvetica,Arial,sans-serif" font-size="11" font-weight="600"
+     letter-spacing="1" text-anchor="middle" fill="#7DD3FC">
+    <rect x="82"  y="244" width="156" height="26" rx="13" fill="#0F1B2E" stroke="#1E3A5F"/>
+    <text x="160" y="261">RAFT CONSENSUS</text>
+    <rect x="250" y="244" width="134" height="26" rx="13" fill="#0F1B2E" stroke="#1E3A5F"/>
+    <text x="317" y="261">WAL + FSYNC</text>
+    <rect x="396" y="244" width="190" height="26" rx="13" fill="#0F1B2E" stroke="#1E3A5F"/>
+    <text x="491" y="261">LINEARIZABLE READS</text>
+    <rect x="598" y="244" width="118" height="26" rx="13" fill="#0F1B2E" stroke="#1E3A5F"/>
+    <text x="657" y="261">LIVE SSE</text>
+  </g>
+
+  <!-- Cluster: leader (top) and two followers -->
+  <g fill="none" stroke="url(#link)" stroke-width="2" stroke-linecap="round">
+    <path d="M940 92 L848 212"/>
+    <path d="M940 92 L1032 212"/>
+    <path d="M848 212 L1032 212" stroke="#3B82F6" stroke-opacity="0.4" stroke-dasharray="4 7"/>
+  </g>
+
+  <!-- Heartbeats travelling leader -> followers -->
+  <g fill="#2DD4BF" filter="url(#glow)">
+    <circle r="4" opacity="0"><animateMotion dur="2.4s" repeatCount="indefinite" path="M940 92 L848 212"/>
+      <animate attributeName="opacity" values="0;1;1;0" dur="2.4s" repeatCount="indefinite"/></circle>
+    <circle r="4" opacity="0"><animateMotion dur="2.4s" repeatCount="indefinite" path="M940 92 L1032 212"/>
+      <animate attributeName="opacity" values="0;1;1;0" dur="2.4s" repeatCount="indefinite"/></circle>
+  </g>
+
+  <!-- Leader -->
+  <circle cx="940" cy="92" r="26" fill="none" stroke="#2DD4BF" stroke-width="1.5">
+    <animate attributeName="r" values="26;56" dur="2.4s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.6;0" dur="2.4s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="940" cy="92" r="26" fill="#0B1F24" stroke="#2DD4BF" stroke-width="2.5" filter="url(#glow)"/>
+  <!-- crown -->
+  <path d="M928 96 L930 84 L935 91 L940 82 L945 91 L950 84 L952 96 Z" fill="#2DD4BF"/>
+  <text x="982" y="96" text-anchor="start" font-family="'SF Mono','Cascadia Code',Consolas,'Courier New',monospace"
+        font-size="11" letter-spacing="1.5" fill="#2DD4BF">node-3 · LEADER</text>
+
+  <!-- Followers -->
+  <g>
+    <circle cx="848" cy="212" r="22" fill="#0E1A2E" stroke="#3B82F6" stroke-width="2"/>
+    <circle cx="848" cy="212" r="6" fill="#3B82F6">
+      <animate attributeName="opacity" values="0.35;1;0.35" dur="2.4s" begin="0.9s" repeatCount="indefinite"/>
+    </circle>
+    <text x="848" y="256" text-anchor="middle" font-family="'SF Mono','Cascadia Code',Consolas,'Courier New',monospace"
+          font-size="11" letter-spacing="1.5" fill="#64748B">node-1</text>
+
+    <circle cx="1032" cy="212" r="22" fill="#0E1A2E" stroke="#3B82F6" stroke-width="2"/>
+    <circle cx="1032" cy="212" r="6" fill="#3B82F6">
+      <animate attributeName="opacity" values="0.35;1;0.35" dur="2.4s" begin="0.9s" repeatCount="indefinite"/>
+    </circle>
+    <text x="1032" y="256" text-anchor="middle" font-family="'SF Mono','Cascadia Code',Consolas,'Courier New',monospace"
+          font-size="11" letter-spacing="1.5" fill="#64748B">node-2</text>
+  </g>
+
+  <!-- Replicated log strip -->
+  <g transform="translate(1100,132)">
+    <rect x="0" y="0"  width="52" height="12" rx="3" fill="#2DD4BF" opacity="0.85"/>
+    <rect x="0" y="18" width="52" height="12" rx="3" fill="#3B82F6" opacity="0.7"/>
+    <rect x="0" y="36" width="52" height="12" rx="3" fill="#3B82F6" opacity="0.45"/>
+    <rect x="0" y="54" width="52" height="12" rx="3" fill="#FB7185" opacity="0.0">
+      <animate attributeName="opacity" values="0;0;0.9;0.9;0" keyTimes="0;0.2;0.3;0.9;1" dur="4.8s" repeatCount="indefinite"/>
+    </rect>
+    <text x="26" y="-10" text-anchor="middle" font-family="'SF Mono','Cascadia Code',Consolas,'Courier New',monospace"
+          font-size="10" letter-spacing="1.5" fill="#475569">LOG</text>
+  </g>
 </svg>

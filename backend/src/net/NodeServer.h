@@ -87,13 +87,17 @@ class NodeServer {
     Node::KvNode& node_;
     FalconHTTP::Routing::Router router_;
     NodeServerOptions options_;
-    FalconHTTP::Core::Server server_;
     ClientApi api_;
     ClusterMonitor monitor_;
     std::atomic<bool> stopping_{false};
     std::thread thread_;
     uint16_t port_;
     bool running_ = false;
+    // Declared last on purpose: members are destroyed in reverse order, so the server
+    // (whose worker threads call into api_, monitor_ and stopping_) must be torn down
+    // first. FalconHTTP's stop() only closes the listener; requests already running on
+    // its thread pool are joined when the server is destroyed.
+    FalconHTTP::Core::Server server_;
 
     void registerRoutes();
     void streamNodeState(FalconHTTP::Streaming::SseConnection& sse);

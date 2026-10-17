@@ -8,7 +8,7 @@ int main(int argc, char* argv[]) {
     // No args: run every registered suite.
     if (argc == 1) {
         printAllTestSuite();
-        return 0;
+        return fail == 0 ? 0 : 1; // non-zero on any failure so CI can gate on it
     }
 
     std::string_view requested = argv[1];
@@ -40,7 +40,7 @@ int main(int argc, char* argv[]) {
             elapsedMs = printOneSuite(suite);
             stats(elapsedMs);
             std::cout << "\n";
-            return 0;
+            return fail == 0 ? 0 : 1;
         }
 
         // Category match: run every suite in it, keep scanning for more.
@@ -52,7 +52,7 @@ int main(int argc, char* argv[]) {
 
     if (foundCategory) {
         stats(elapsedMs);
-        return 0;
+        return fail == 0 ? 0 : 1;
     }
 
     std::cerr << "\nUnknown test suite: " << requested << "\n\n";
