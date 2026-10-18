@@ -237,8 +237,14 @@ Tested locally, against the real backend binary:
 
 Not verified, and where it will show up:
 
-- **`Dockerfile.demo`:** the `Demo image` workflow builds and checks it. The CMake flags it
-  uses were built and run locally.
+- **`Dockerfile.demo` itself:** the `Demo image` workflow builds and checks it. Its first CI
+  run found a real bug, now fixed: `init-nested-submodules.sh` made a single pass, so the
+  libraries' own nested dependencies (`VectorPro`, `HashMapPro`, ...) were never cloned and
+  the compile failed. The script now repeats until nothing is missing. I then reproduced the
+  Docker build context locally (a checkout with no submodule contents), ran the fixed
+  script, built the backend with the image's CMake flags, and ran
+  [`scripts/check-demo.sh`](../scripts/check-demo.sh) against that binary: 15 of 15 passed.
+  What I could not run is Docker itself (the base images, `apt`, the copied Node binary).
 - **Render and Vercel behavior:** your first deploy and `check-demo.sh`.
 - **The real browser:** CORS preflight was checked with `curl`, not a browser. Open the
   deployed dashboard once to confirm.

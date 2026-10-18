@@ -54,10 +54,12 @@ jobs:
       - name: Check it from outside
         run: scripts/check-demo.sh http://127.0.0.1:10000 https://dashboard.example
 
+      # If the image failed to build, there is no container; say so instead of adding a
+      # second, misleading error on top of the real one.
       - name: Container logs
         if: always()
-        run: docker logs demo
+        run: docker logs demo || echo "No container to show logs for (an earlier step failed)."
 
       - name: Stop the container
         if: always()
-        run: docker rm -f demo
+        run: docker rm -f demo || true
