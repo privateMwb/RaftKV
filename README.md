@@ -62,7 +62,8 @@
 > durable log, survive `kill -9`, and serve a key-value API with linearizable reads. A
 > responsive dashboard (desktop and phone) shows every node's own view live, and can
 > crash, revive, slow down, and partition the real processes. The Docker setup is
-> included but **untested**, and nothing is deployed.
+> included but **untested**, and nothing is deployed yet; a hosted-demo setup for Render
+> and Vercel is prepared (see [Deployment](#deployment)).
 
 <br>
 
@@ -79,6 +80,7 @@
 - [Client API](#client-api)
 - [Live Cluster State](#live-cluster-state)
 - [Docker](#docker)
+- [Deployment](#deployment)
 - [Project Structure](#project-structure)
 - [Roadmap](#roadmap)
 - [Design Notes](#design-notes)
@@ -103,6 +105,7 @@
 - **Plain-language narration** — the dashboard explains what is happening: *election in progress*, *stale leader*, *no majority*, *node catching up*.
 - **Built to run on a phone** — the dashboard is responsive, and the backend runs happily under Termux.
 - **Rate limiting built in** — a per-client limit on the client API (default 600 requests per 10 s), plus a 64 KiB value cap, both configurable.
+- **Ready to host** — a single-port gateway, a demo image, and a Render blueprint put the whole cluster behind one URL, with the dashboard on Vercel. Prepared but not yet deployed; see [Deployment](#deployment).
 - **Built on its author's own libraries** — consensus, HTTP, rate limiting and the write-ahead log are all vendored as submodules (see [Stack](#stack)).
 
 <div align="right"><a href="#-table-of-contents"><img src=".github/assets/back-to-top.svg" alt="Back to top" height="28"></a></div>
@@ -338,6 +341,24 @@ docker compose down -v                 # stop and delete the data
 
 <div align="right"><a href="#-table-of-contents"><img src=".github/assets/back-to-top.svg" alt="Back to top" height="28"></a></div>
 
+## <a id="deployment"></a>☁️ Deployment
+
+RaftKV can run as a **public demo**: the backend (the launcher, three real nodes, and a gateway) in one container on [Render](https://render.com), and the dashboard on [Vercel](https://vercel.com). The gateway puts the whole cluster behind a single port, forwards only the routes the dashboard needs, and shares each node's live stream between any number of visitors.
+
+```bash
+# Render:  New → Blueprint, pick this repo (render.yaml), then set ALLOWED_ORIGINS
+# Vercel:  import the repo, Root Directory = frontend, set VITE_NODE_URLS and VITE_LAUNCHER_URL
+scripts/check-demo.sh https://<your-service>.onrender.com https://<your-app>.vercel.app
+```
+
+> [!CAUTION]
+> **Prepared, not yet deployed.** The gateway, watchdog, and the dashboard's client logic were tested locally against the real backend, and the `Demo image` workflow builds and checks the container in CI. Nothing has been run on Render or Vercel yet. The step-by-step guide, including exactly what was and wasn't verified, is in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
+
+> [!WARNING]
+> A public demo means **anyone can crash the cluster** with the Kill button. That is the point, and it is contained: the gateway allows only the dashboard's routes, rate-limits destructive actions, never exposes the nodes' peer-to-peer routes, and a watchdog heals a cluster left broken. Nothing persists. See [SECURITY.md](SECURITY.md#hosted-demo).
+
+<div align="right"><a href="#-table-of-contents"><img src=".github/assets/back-to-top.svg" alt="Back to top" height="28"></a></div>
+
 ## <a id="project-structure"></a>🗂️ Project Structure
 
 ```
@@ -358,11 +379,15 @@ RaftKV/
 ├── frontend/               Dashboard: React + Vite + Tailwind (see frontend/README.md)
 ├── scripts/                launcher.mjs + network.mjs: run the cluster, kill/revive nodes,
 │                           inject delay and partitions
+│                           gateway.mjs + watchdog.mjs + demo-server.mjs: the hosted demo
+│                           ci-smoke.sh, check-demo.sh: smoke tests (node / deployed demo)
 ├── docs/                   ARCHITECTURE.md (how it works), DEMO.md (guided tour)
 ├── .github/                Workflows, release notes, README assets
 │
 ├── Dockerfile              Node image (see Docker)
 ├── docker-compose.yml      3-node cluster, fixed IPs (untested)
+├── Dockerfile.demo         Hosted-demo image: launcher + 3 nodes + gateway (see Deployment)
+├── render.yaml             Render blueprint for the demo backend
 ├── init-nested-submodules.sh
 ├── .clang-format
 ├── .clang-tidy
@@ -426,11 +451,11 @@ At 80 ms a heartbeat round trip (≥160 ms) outlasts the shortest election timeo
 
 ```bash
 npm --prefix frontend run lint
-npm --prefix frontend test
+npm --prefix frontend test        # also runs the launcher, network, and gateway tests in scripts/tests/
 npm --prefix frontend run build
 ```
 
-Formatting and static analysis are enforced in CI via `.clang-format` and `.clang-tidy`, and the sanitizer workflow builds the backend with ASan/UBSan and TSan. See [CONTRIBUTING.md](CONTRIBUTING.md) for what CI does and doesn't cover.
+Formatting and static analysis are enforced in CI via `.clang-format` and `.clang-tidy`, and the sanitizer workflow runs the full test suite plus a real-node smoke test under ASan/UBSan and under TSan. See [CONTRIBUTING.md](CONTRIBUTING.md) for what CI covers.
 
 <div align="right"><a href="#-table-of-contents"><img src=".github/assets/back-to-top.svg" alt="Back to top" height="28"></a></div>
 
@@ -440,6 +465,7 @@ Formatting and static analysis are enforced in CI via `.clang-format` and `.clan
 |---|---|
 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | How it works: Raft in one page, observability, fault injection, measurements, trade-offs |
 | [docs/DEMO.md](docs/DEMO.md) | A ten-minute guided tour: crash the leader, partition it, slow the network, lose the majority |
+| [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) | Hosting the demo: Render backend, Vercel dashboard, verification, limits |
 | [frontend/README.md](frontend/README.md) | Dashboard internals and design choices |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Setup, tests, code style, and the pull request checklist |
 | [SECURITY.md](SECURITY.md) | Security model, scope, and how to report a vulnerability |
@@ -451,7 +477,7 @@ Formatting and static analysis are enforced in CI via `.clang-format` and `.clan
 
 Issues and pull requests are welcome. [CONTRIBUTING.md](CONTRIBUTING.md) covers setup, running the tests, code style, and a pull request checklist. In short:
 
-- Run `./build/raftkv_tests` and format C++ with the repo's `.clang-format` — CI checks formatting but **does not run the backend tests**, so please run them locally
+- Run `./build/raftkv_tests` and format C++ with the repo's `.clang-format` — CI runs the tests (also under ASan/UBSan and TSan) and rejects unformatted code
 - For frontend changes, run `npm --prefix frontend run lint` and `npm --prefix frontend test`
 - If you touch the Raft path, try the crash and partition scenarios in [docs/DEMO.md](docs/DEMO.md) before pushing
 

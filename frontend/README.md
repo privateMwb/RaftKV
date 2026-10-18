@@ -64,6 +64,12 @@ All optional, in `.env.local` (see `.env.example`): `VITE_NODE_HOST`,
 the launcher allow any origin (`--cors-origin '*'`); if you start nodes yourself,
 pass `--cors-origin http://localhost:5173` (or `'*'`).
 
+For a hosted demo, `VITE_NODE_URLS` takes each node's full base URL instead of a host and
+ports (for example `https://demo.example/n/1,https://demo.example/n/2,...`) and wins over
+`VITE_NODE_HOST`/`VITE_NODE_PORTS`; point `VITE_LAUNCHER_URL` at the gateway's
+`/launcher`. Vite reads these at **build** time, so set them in the host's build
+environment. See [../docs/DEPLOYMENT.md](../docs/DEPLOYMENT.md).
+
 ## Layout
 
 ```

@@ -60,14 +60,37 @@ dashboard that can crash, slow down, and partition the real processes.
 - Responsive layout that works on a phone as well as a desktop.
 - React 19, Vite, and Tailwind CSS v4.
 
+**Hosted demo**
+
+- `scripts/gateway.mjs`: a zero-dependency reverse proxy that puts the whole cluster behind
+  one public port (node *k* at `/n/k/...`, the launcher at `/launcher/...`). It forwards an
+  allowlist of routes (never the nodes' peer-to-peer RPC), sets CORS for configured origins
+  only, rate-limits requests and destructive controls, caps request bodies and concurrent
+  streams, and shares one upstream live stream per node between any number of viewers.
+- `scripts/watchdog.mjs` and `scripts/demo-server.mjs`: the container entry point supervises
+  the launcher and heals a cluster left broken (restarts stopped nodes, clears network
+  faults) after a configurable time.
+- Launcher option `--public-base-url`, so follower redirects point back through the gateway.
+- Dashboard setting `VITE_NODE_URLS` (full node URLs) for a hosted build.
+- `Dockerfile.demo`, `render.yaml` (Render blueprint), and `frontend/vercel.json`.
+- `scripts/check-demo.sh`: a read-only, post-deploy check of a running demo from the outside,
+  including CORS for the dashboard's origin.
+- `Demo image` workflow: builds the image and runs `check-demo.sh` against the container.
+- [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md): the deployment guide.
+
 **Documentation and tooling**
 
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md): how the system works, the observability
   model, fault injection, measurements, trade-offs, and known limits.
 - [docs/DEMO.md](docs/DEMO.md): a ten-minute guided tour.
 - Dockerfile and `docker-compose.yml` for a three-node cluster with fixed IPs (**untested**).
-- GitHub Actions: Build (GCC and Clang, Debug and Release), Clang Format, Clang Tidy,
-  Sanitizers, CodeQL, Frontend, Docs, and Release; Dependabot for Actions and npm.
+- GitHub Actions: Build (GCC and Clang, Debug and Release, running the full test suite),
+  Clang Format, Clang Tidy, Sanitizers (the test suite and a real-node smoke test under
+  ASan/UBSan and under TSan), CodeQL, Frontend, Docs, and Release; Dependabot for Actions
+  and npm.
+- `scripts/ci-smoke.sh`: boots a real node, exercises the API with concurrent writes and
+  the event stream, and checks for a clean shutdown and sanitizer reports.
+- The test runner (`raftkv_tests`) exits non-zero when any test fails.
 - README, `SECURITY.md`, `CONTRIBUTING.md`, and this changelog.
 
 [Unreleased]: https://github.com/privateMwb/RaftKV/compare/v1.0.0...HEAD

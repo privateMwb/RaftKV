@@ -56,31 +56,42 @@ npm --prefix frontend run dev          # http://localhost:5173
 [docs/DEMO.md](docs/DEMO.md) walks through crashing the leader, partitioning it, slowing
 the network and losing the majority.
 
-## What CI checks (and what it doesn't)
+## What CI checks
 
 | Workflow | Covers |
 |---|---|
-| **Build** | Backend with GCC and Clang, Debug and Release |
+| **Build** | Backend with GCC and Clang, Debug and Release, then **runs every test suite** (`raftkv_tests`) |
 | **Clang Format** | `backend/include` and `backend/src` against `.clang-format` |
 | **Clang Tidy** | `.cpp` files under `backend/include` and `backend/src` against `.clang-tidy` |
-| **Sanitizers** | Backend built with ASan/UBSan and with TSan |
+| **Sanitizers** | Backend built with ASan/UBSan and with TSan; the **full test suite** and a real-node smoke test ([`scripts/ci-smoke.sh`](scripts/ci-smoke.sh)) run under each |
 | **CodeQL** | C++ and TypeScript, on push and weekly |
-| **Frontend** | `npm run lint`, `npm test`, `npm run build` (only when `frontend/` changes) |
+| **Frontend** | `npm run lint`, `npm test` (which also runs the launcher, network, and gateway tests in `scripts/tests/`), `npm run build`; runs when `frontend/` or `scripts/` changes |
+| **Demo image** | Builds `Dockerfile.demo`, starts the container, and runs [`scripts/check-demo.sh`](scripts/check-demo.sh) against it |
 
-> [!IMPORTANT]
-> **CI does not run the backend test suite.** The Build workflow compiles it but never
-> executes `raftkv_tests`. Please run the suites locally before opening a pull request, and
-> say so in the description.
+The test runner exits non-zero if any test fails, so a red **Build** or **Sanitizers** job
+means a test failed or a sanitizer reported something. Reproduce it locally with
+`./build/raftkv_tests`; for a sanitizer failure, configure with the same flags as the
+workflow, for example:
+
+```bash
+CXX=clang++ CXXFLAGS="-fsanitize=thread -fno-omit-frame-pointer -g -O1" \
+  LDFLAGS="-fsanitize=thread" cmake -S . -B build-tsan -DCMAKE_BUILD_TYPE=Debug
+cmake --build build-tsan && ./build-tsan/raftkv_tests
+```
+
+The smoke test works on any build: `scripts/ci-smoke.sh backend/build/raftkv_backend`.
 
 ## Before you open a pull request
 
-- [ ] The backend builds and `./build/raftkv_tests` passes.
+- [ ] The backend builds and `./build/raftkv_tests` passes (CI runs it too, but a local run is faster feedback).
 - [ ] New behavior has a test, and a bug fix has a test that fails without it.
 - [ ] C++ is formatted: `clang-format -i <files>` (the CI check fails on any diff).
 - [ ] Frontend changes pass `npm run lint` and `npm test`; run `npm run format` for Prettier.
 - [ ] If you touched the Raft path (`KvNode`, `WalStorage`, `FilePersistentState`,
       `HttpTransport`), you tried the crash and partition scenarios in
       [docs/DEMO.md](docs/DEMO.md).
+- [ ] If you touched `scripts/gateway.mjs`: a new route is a deliberate decision. The allowlist in
+      `classify()` is what keeps the public demo safe, so every route you add or change needs a test.
 - [ ] Docs match the code: update the README tables, `docs/ARCHITECTURE.md`, or
       `frontend/README.md` if behavior, flags, endpoints or limits changed.
 - [ ] Add an entry under **Unreleased** in [CHANGELOG.md](CHANGELOG.md) for anything a user

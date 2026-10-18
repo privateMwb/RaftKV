@@ -53,7 +53,32 @@ is a deliberate scope limit, not an oversight:
 
 If you run RaftKV anywhere other than your own machine, keep every node and launcher port
 behind a firewall or private network, never expose them to the internet, and put an
-authenticating, TLS-terminating proxy in front of anything that must be reachable.
+authenticating, TLS-terminating proxy in front of anything that must be reachable. The one
+deliberate exception is the [hosted demo](#hosted-demo) below, which is public by design and
+is protected differently.
+
+## Hosted demo
+
+The hosted demo (see [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)) is **intentionally public**:
+anyone who opens the dashboard can read and write keys and crash, slow down, and partition
+the cluster. It has no login, because crashing the cluster is the point of it. It is safe to
+leave open because of what it exposes and what it holds:
+
+- **It holds nothing real.** Node data is wiped on every start, and the demo stores only
+  what visitors type into it. Never put anything sensitive in it.
+- **Only an allowlist is reachable.** `scripts/gateway.mjs` forwards the client API, the
+  read-only state routes, the live streams, and the specific launcher controls the dashboard
+  uses. The nodes' peer-to-peer routes (`/raft/...`), stopping the whole cluster, and every
+  other route are `404`. Nodes and launcher listen on `127.0.0.1` inside the container.
+- **Cross-origin access is explicit.** Browsers get CORS headers only for the origins in
+  `ALLOWED_ORIGINS`; the backend's own `*` headers are removed.
+- **Abuse is bounded.** Per-client limits on requests, destructive controls, concurrent
+  streams, and body size, plus a global cap on destructive controls.
+- **It repairs itself.** A node left down, or a link left cut, is restored automatically.
+- **Credentials never reach the backend.** Cookies and authorization headers are dropped.
+
+What this does *not* give you is authentication or confidentiality: assume every request,
+and every key and value, is visible to anyone.
 
 ## What counts as a vulnerability
 
@@ -70,11 +95,15 @@ authenticating, TLS-terminating proxy in front of anything that must be reachabl
 - Command injection or unintended process control in the launcher.
 - Resource exhaustion that bypasses the documented limits (64 KiB value cap, 10 MiB body
   limit, the SSE stream cap, the rate limiter).
+- A way around the hosted demo's gateway: reaching a route that is not on its allowlist
+  (especially `/raft/...`), getting CORS headers for an origin that is not allowed, evading
+  its rate limits or stream caps, or making it forward credentials or arbitrary headers.
 
 **Out of scope** (documented design limits)
 
 - The missing authentication and encryption described above, and consequences of exposing
-  the services to untrusted networks.
+  the services to untrusted networks. (The hosted demo's open Kill button and writes are by
+  design; see above.)
 - Availability loss under injected network delay or partitions. Raft is expected to stop
   answering rather than answer wrongly; see
   [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#what-the-measurements-show).
@@ -89,7 +118,8 @@ authenticating, TLS-terminating proxy in front of anything that must be reachabl
 ## How the project stays on top of this
 
 - **CodeQL** analyzes the C++ and TypeScript on every push and weekly.
-- **Sanitizer builds** (ASan/UBSan and TSan) run in CI.
+- **Sanitizers**: the full test suite, including real multi-node clusters, and a smoke test
+  of a real node run under ASan/UBSan and under TSan in CI.
 - **Dependabot** proposes weekly updates for GitHub Actions and the frontend's npm
   dependencies.
 - Submodules are pinned to specific commits and updated deliberately.

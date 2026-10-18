@@ -46,6 +46,8 @@ const USAGE = `usage: node scripts/launcher.mjs [options]
   --proxy-base P      first port of the node-to-node proxies (default base-port + 100)
   --no-network        no proxies: nodes talk directly (disables delay and partitions)
   --public-host H     host clients use to reach the nodes, for redirect links (default 127.0.0.1)
+  --public-base-url U base URL of a gateway in front of the nodes (see gateway.mjs): redirect
+                      links point at U/n/<number> instead of http://<public-host>:<port>
   --cors-origin O     value passed to nodes as --cors-origin (default *)
   --fresh             wipe the data root first (start from an empty cluster)
   --no-autostart      don't start the nodes at launch`;
@@ -61,6 +63,7 @@ function parseArgs(argv) {
     proxyBase: null,
     network: true,
     publicHost: "127.0.0.1",
+    publicBaseUrl: null,
     corsOrigin: "*",
     fresh: false,
     autostart: true,
@@ -92,6 +95,8 @@ function parseArgs(argv) {
       options.proxyBase = number(arg, value(), 1024, 65000);
     else if (arg === "--no-network") options.network = false;
     else if (arg === "--public-host") options.publicHost = value();
+    else if (arg === "--public-base-url")
+      options.publicBaseUrl = value().replace(/\/+$/, "");
     else if (arg === "--cors-origin") options.corsOrigin = value();
     else if (arg === "--fresh") options.fresh = true;
     else if (arg === "--no-autostart") options.autostart = false;
@@ -131,6 +136,14 @@ const emulator = options.network
     })
   : null;
 
+// Where a client should go to reach this node: straight to its port, or through the
+// gateway (which serves node k at /n/k) when --public-base-url is set.
+function publicUrlOf(node) {
+  return options.publicBaseUrl
+    ? `${options.publicBaseUrl}/n/${nodes.indexOf(node) + 1}`
+    : `http://${options.publicHost}:${node.port}`;
+}
+
 function argsFor(node) {
   const args = [
     "--id",
@@ -151,10 +164,7 @@ function argsFor(node) {
     args.push("--peer", `${peer.id}=127.0.0.1:${port}`);
     // Peers reach each other via the proxies, but a client following a redirect needs
     // the node's real address, so say so explicitly.
-    args.push(
-      "--public-url",
-      `${peer.id}=http://${options.publicHost}:${peer.port}`,
-    );
+    args.push("--public-url", `${peer.id}=${publicUrlOf(peer)}`);
   }
 
   return args;

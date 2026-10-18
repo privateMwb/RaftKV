@@ -1,0 +1,90 @@
+# syntax=docker/dockerfile:1
+
+# ============================================================
+# RaftKV hosted-demo image
+#
+# One container that runs the whole demo: the launcher, three
+# real RaftKV nodes on localhost, and the gateway on a single
+# public port ($PORT, 10000 by default, which is what Render
+# expects). The dashboard is deployed separately; see
+# docs/DEPLOYMENT.md.
+#
+# This is NOT the per-node image (that is ./Dockerfile, used by
+# docker-compose.yml). Build and run it locally with:
+#
+#   docker build -f Dockerfile.demo -t raftkv-demo .
+#   docker run --rm -p 10000:10000 \
+#       -e ALLOWED_ORIGINS=http://localhost:5173 raftkv-demo
+#   scripts/check-demo.sh http://localhost:10000 http://localhost:5173
+#
+# As in ./Dockerfile, nested git submodules are cloned by
+# init-nested-submodules.sh, which fetches each library's default
+# branch (--depth 1) rather than the commit this repo pins.
+# ============================================================
+
+FROM ubuntu:24.04 AS build
+
+RUN apt-get update && \
+    apt-get install -y \
+        build-essential \
+        ca-certificates \
+        cmake \
+        git \
+        && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY . .
+
+RUN chmod +x init-nested-submodules.sh && ./init-nested-submodules.sh
+
+WORKDIR /app/backend
+
+# RAFTKV_BUILD_TESTS=OFF: the demo does not need the test binary. BUILD_* switch off
+# the submodules' own tests, benchmarks and examples.
+RUN cmake -S . -B build \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DRAFTKV_BUILD_TESTS=OFF \
+    -DBUILD_TESTS=OFF \
+    -DBUILD_BENCHMARKS=OFF \
+    -DBUILD_REGRESSION=OFF \
+    -DBUILD_EXAMPLES=OFF
+
+RUN cmake --build build --config Release --target raftkv_backend -j$(nproc)
+
+
+FROM ubuntu:24.04
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        ca-certificates \
+        libstdc++6 \
+        && \
+    rm -rf /var/lib/apt/lists/*
+
+# Node runs the launcher, gateway and watchdog (zero npm dependencies). It is copied from
+# the official image rather than installed with apt, which would give an old release; the
+# base stays Ubuntu because the backend binary above is built against its glibc.
+COPY --from=node:22-bookworm-slim /usr/local/bin/node /usr/local/bin/node
+
+WORKDIR /app
+
+COPY --from=build /app/backend/build/raftkv_backend /app/raftkv_backend
+COPY scripts/launcher.mjs scripts/network.mjs scripts/gateway.mjs scripts/watchdog.mjs scripts/demo-server.mjs /app/scripts/
+
+# Run as an unprivileged user. Node data lives under /tmp and is wiped on every start: this
+# is a disposable demo, so there is nothing to persist.
+RUN useradd --system --no-create-home --shell /usr/sbin/nologin raftkv
+USER raftkv
+
+ENV NODE_ENV=production \
+    PORT=10000 \
+    BINARY=/app/raftkv_backend
+
+EXPOSE 10000
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=20s \
+    CMD node -e "fetch('http://127.0.0.1:'+process.env.PORT+'/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+
+CMD ["node", "/app/scripts/demo-server.mjs"]

@@ -263,6 +263,36 @@ describe("buildConfig", () => {
     ]);
     assert.equal(config.launcherUrl, "http://l:1");
   });
+
+  it("takes full node URLs for a hosted demo, and they win over host and ports", () => {
+    const config = buildConfig(
+      {
+        VITE_NODE_URLS:
+          "https://demo.example/n/1, https://demo.example/n/2/ ,https://demo.example/n/3",
+        VITE_NODE_HOST: "ignored",
+        VITE_NODE_PORTS: "9001",
+        VITE_LAUNCHER_URL: "https://demo.example/launcher/",
+      },
+      "ignored",
+    );
+    assert.deepEqual(config.nodes, [
+      { id: "node-1", url: "https://demo.example/n/1" },
+      { id: "node-2", url: "https://demo.example/n/2" },
+      { id: "node-3", url: "https://demo.example/n/3" },
+    ]);
+    assert.equal(config.launcherUrl, "https://demo.example/launcher");
+  });
+
+  it("skips junk node URLs, and falls back to host and ports if none are usable", () => {
+    const mixed = buildConfig(
+      { VITE_NODE_URLS: "not a url, ftp://x/n/1, https://demo.example/n/1, javascript:alert(1)" },
+      "h",
+    );
+    assert.deepEqual(mixed.nodes, [{ id: "node-1", url: "https://demo.example/n/1" }]);
+
+    const none = buildConfig({ VITE_NODE_URLS: "junk, also junk", VITE_NODE_PORTS: "9001" }, "h");
+    assert.deepEqual(none.nodes, [{ id: "node-1", url: "http://h:9001" }]);
+  });
 });
 
 describe("format and kv helpers", () => {

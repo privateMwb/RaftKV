@@ -2,6 +2,11 @@
 
 interface ImportMetaEnv {
   readonly VITE_API_BASE_URL: string;
+  /**
+   * Full base URL of each node, comma-separated, in node-1, node-2, ... order. For a hosted
+   * demo behind the gateway. Wins over VITE_NODE_HOST and VITE_NODE_PORTS.
+   */
+  readonly VITE_NODE_URLS?: string;
   /** Host the nodes run on; defaults to the host that served this page. */
   readonly VITE_NODE_HOST?: string;
   /** Comma-separated node ports, in node-1, node-2, ... order. Default 8101,8102,8103. */

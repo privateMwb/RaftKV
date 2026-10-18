@@ -1,9 +1,8 @@
-# The node image needs only the backend and the submodule bootstrap script.
+# The images need the backend, the submodule bootstrap script, and (for the demo image) scripts/.
 .git
 .github
 docs
 frontend
-scripts
 **/node_modules
 **/build
 **/dist

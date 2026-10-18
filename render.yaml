@@ -1,0 +1,21 @@
+# Render Blueprint for the hosted demo backend: one container that runs the launcher,
+# three real RaftKV nodes, and the gateway on Render's single public port.
+# The dashboard is deployed separately (Vercel); see docs/DEPLOYMENT.md.
+services:
+  - type: web
+    name: raftkv-demo
+    runtime: docker
+    dockerfilePath: ./Dockerfile.demo
+    dockerContext: .
+    # "free" works but sleeps after a while without traffic and has very little CPU,
+    # which can make elections flap. If the demo looks unstable, use "starter".
+    plan: free
+    healthCheckPath: /healthz
+    envVars:
+      # Your dashboard's exact origin, e.g. https://raftkv.vercel.app (comma-separate several).
+      # Browsers on any other origin are refused. Set this in the Render dashboard.
+      - key: ALLOWED_ORIGINS
+        sync: false
+      # A cluster left broken (a node down, a link cut) is healed after this many seconds.
+      - key: RESET_AFTER_SECONDS
+        value: "180"

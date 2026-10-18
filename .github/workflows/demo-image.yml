@@ -1,0 +1,63 @@
+# ============================================================
+# .github/workflows/demo-image.yml
+# Builds the hosted-demo image (Dockerfile.demo) and checks the
+# running container from the outside with scripts/check-demo.sh:
+# leader election, a write through a follower's redirect, the
+# route allowlist, the live stream, and CORS.
+#
+# This is the same check you can run against a deployed Render
+# service, so a green run here means the image itself works.
+# ============================================================
+
+name: Demo image
+
+on:
+  push:
+    paths:
+      - "Dockerfile.demo"
+      - ".dockerignore"
+      - "render.yaml"
+      - "init-nested-submodules.sh"
+      - "backend/**"
+      - "scripts/**"
+      - ".github/workflows/demo-image.yml"
+  pull_request:
+    paths:
+      - "Dockerfile.demo"
+      - ".dockerignore"
+      - "render.yaml"
+      - "init-nested-submodules.sh"
+      - "backend/**"
+      - "scripts/**"
+      - ".github/workflows/demo-image.yml"
+
+jobs:
+  build-and-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build the image
+        run: docker build -f Dockerfile.demo -t raftkv-demo .
+
+      - name: Start the container
+        run: |
+          docker run -d --name demo -p 10000:10000 \
+            -e ALLOWED_ORIGINS=https://dashboard.example \
+            -e PUBLIC_BASE_URL=http://127.0.0.1:10000 \
+            -e TRUST_PROXY_HOPS=0 \
+            raftkv-demo
+
+      - name: Check it from outside
+        run: scripts/check-demo.sh http://127.0.0.1:10000 https://dashboard.example
+
+      - name: Container logs
+        if: always()
+        run: docker logs demo
+
+      - name: Stop the container
+        if: always()
+        run: docker rm -f demo
