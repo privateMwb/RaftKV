@@ -4,7 +4,7 @@
 # Dependabot keeps the pinned digest current.
 # ============================================================
 
-FROM gcr.io/oss-fuzz-base/base-builder@sha256:0b571c53b7180e7266de67665bc3ccef35618593af5714fee0750d611dc8b1f6
+FROM gcr.io/oss-fuzz-base/base-builder@sha256:1f9cf74bc3d7029b528494542f9d9851b256dceed38d3f420989434dc5ae0760
 
 COPY . $SRC/RaftKV
 COPY .clusterfuzzlite/build.sh $SRC/
