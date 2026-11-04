@@ -31,6 +31,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Create the output folder
+        run: mkdir -p docs/images
+
       - name: Wake the backend (free Render instances sleep)
         run: |
           curl --fail --silent --show-error \
