@@ -92,8 +92,10 @@ bool decode(std::string_view data, Term& term, std::optional<NodeId>& vote) {
         return false;
     data.remove_prefix(lengthEnd + 1);
 
-    // Exactly <length> bytes then the closing newline, nothing after.
-    if (data.size() != length + 1 || data.back() != '\n')
+    // Exactly <length> bytes then the closing newline, nothing after. The length
+    // comes from the file, so compare without `length + 1`, which wraps to 0 for
+    // length == UINT64_MAX and would let an empty tail reach data.back().
+    if (data.empty() || length != data.size() - 1 || data.back() != '\n')
         return false;
 
     vote = NodeId(data.substr(0, length));

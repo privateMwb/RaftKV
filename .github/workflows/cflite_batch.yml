@@ -1,0 +1,50 @@
+# ============================================================
+# .github/workflows/cflite_batch.yml
+# Longer nightly ClusterFuzzLite run, independent of any pull
+# request. This is what accumulates real fuzzing time over days.
+# ============================================================
+
+name: Batch Fuzzing
+
+on:
+  schedule:
+    - cron: "0 4 * * *" # Once a day, 04:00 UTC.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  BatchFuzzing:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        sanitizer:
+          - address
+          - undefined
+    steps:
+      - name: Checkout (with submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Build Fuzzers (${{ matrix.sanitizer }})
+        id: build
+        uses: google/clusterfuzzlite/actions/build_fuzzers@884713a6c30a92e5e8544c39945cd7cb630abcd1 # v1
+        with:
+          language: c++
+          sanitizer: ${{ matrix.sanitizer }}
+
+      - name: Run Fuzzers (${{ matrix.sanitizer }})
+        id: run
+        uses: google/clusterfuzzlite/actions/run_fuzzers@884713a6c30a92e5e8544c39945cd7cb630abcd1 # v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          fuzz-seconds: 1800
+          mode: "batch"
+          sanitizer: ${{ matrix.sanitizer }}
+          output-sarif: true

@@ -95,6 +95,14 @@ static void corrupt_file_rejected() {
     }
     FilePersistentState truncated(dir.file("short"));
     CHK(truncated.open() == Status::PARSE_ERROR);
+
+    {
+        // A length of UINT64_MAX plus one wraps to 0, so an empty tail must not pass.
+        std::ofstream out(dir.file("huge"), std::ios::binary);
+        out << "RKVP1\n5\nV 18446744073709551615 ";
+    }
+    FilePersistentState huge(dir.file("huge"));
+    CHK(huge.open() == Status::PARSE_ERROR);
 }
 
 // Verifies the write-temp-then-rename leaves only the final file.
