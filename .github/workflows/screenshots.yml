@@ -1,8 +1,14 @@
 # ============================================================
 # .github/workflows/screenshots.yml
 # Manually triggered. Opens the live dashboard in a headless browser,
-# takes the README screenshots, and uploads them as a downloadable
-# artifact. Commit the PNGs to docs/images/ through a normal PR.
+# takes the README screenshots, uploads them as a downloadable
+# artifact, and opens a pull request that adds them to docs/images/.
+#
+# One-time setup for the PR step: Settings -> Actions -> General ->
+# "Allow GitHub Actions to create and approve pull requests".
+# PRs opened with the built-in token do not start other workflows, so
+# the required build checks will not run on it; close and reopen the
+# PR (or merge with your bypass) to get them going.
 #
 # Heads-up: this kills the current leader on the live demo (it
 # recovers on its own after a few minutes).
@@ -19,9 +25,14 @@ on:
       backend_url:
         description: "Backend URL (woken up before capturing)"
         default: "https://raftkv-5ruc.onrender.com"
+      open_pr:
+        description: "Open a PR that adds the screenshots to docs/images/"
+        type: boolean
+        default: true
 
 permissions:
-  contents: read
+  contents: write
+  pull-requests: write
 
 jobs:
   capture:
@@ -68,3 +79,28 @@ jobs:
           name: screenshots
           path: docs/images/*.png
           if-no-files-found: warn
+
+      - name: Open a PR with the screenshots
+        if: ${{ inputs.open_pr }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          rm -f docs/images/_debug-failure.png
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          BRANCH="docs/screenshots-${{ github.run_id }}"
+          git checkout -b "$BRANCH"
+          git add docs/images/*.png
+          if git diff --cached --quiet; then
+            echo "Screenshots are unchanged; no PR needed."
+            exit 0
+          fi
+
+          git commit -m "docs: update dashboard screenshots"
+          git push origin "$BRANCH"
+          gh pr create \
+            --base main \
+            --head "$BRANCH" \
+            --title "docs: update dashboard screenshots" \
+            --body "Screenshots captured from ${{ inputs.dashboard_url }} by the Screenshots workflow (run ${{ github.run_id }}). Check the images before merging."
