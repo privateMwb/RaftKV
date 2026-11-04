@@ -36,3 +36,12 @@ updates:
       interval: "weekly"
     commit-message:
       prefix: "docker"
+
+  # OSS-Fuzz base image used by ClusterFuzzLite. Keeps the pinned
+  # sha256 digest in .clusterfuzzlite/Dockerfile up to date.
+  - package-ecosystem: "docker"
+    directory: "/.clusterfuzzlite"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "docker"
