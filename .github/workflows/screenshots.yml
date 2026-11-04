@@ -1,0 +1,67 @@
+# ============================================================
+# .github/workflows/screenshots.yml
+# Manually triggered. Opens the live dashboard in a headless browser,
+# takes the README screenshots, and uploads them as a downloadable
+# artifact. Commit the PNGs to docs/images/ through a normal PR.
+#
+# Heads-up: this kills the current leader on the live demo (it
+# recovers on its own after a few minutes).
+# ============================================================
+
+name: Screenshots
+
+on:
+  workflow_dispatch:
+    inputs:
+      dashboard_url:
+        description: "Dashboard URL"
+        default: "https://raft-kv.vercel.app"
+      backend_url:
+        description: "Backend URL (woken up before capturing)"
+        default: "https://raftkv-5ruc.onrender.com"
+
+permissions:
+  contents: read
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Wake the backend (free Render instances sleep)
+        run: |
+          curl --fail --silent --show-error \
+            --retry 20 --retry-delay 10 --retry-all-errors --max-time 60 \
+            "${{ inputs.backend_url }}/healthz"
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Playwright
+        run: |
+          mkdir "$RUNNER_TEMP/pw"
+          cp scripts/capture-screenshots.mjs "$RUNNER_TEMP/pw/"
+          cd "$RUNNER_TEMP/pw"
+          npm init -y
+          npm install playwright@1.49.1
+          npx playwright install --with-deps chromium
+
+      - name: Capture screenshots
+        working-directory: ${{ runner.temp }}/pw
+        env:
+          DASHBOARD_URL: ${{ inputs.dashboard_url }}
+          OUT_DIR: ${{ github.workspace }}/docs/images
+        run: node capture-screenshots.mjs
+
+      - name: Upload screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: docs/images/*.png
+          if-no-files-found: warn

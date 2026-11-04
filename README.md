@@ -65,6 +65,18 @@
 > included but **untested**. A live demo is hosted on Render and Vercel: try it at
 > **[raft-kv.vercel.app](https://raft-kv.vercel.app)** (see [Deployment](#deployment)).
 
+<p align="center">
+  <img src="docs/images/dashboard-overview.png" alt="RaftKV dashboard: a 3-node cluster with a leader elected" width="100%">
+</p>
+
+<details>
+<summary>More screenshots</summary>
+
+![Key-value console after writing keys](docs/images/dashboard-kv-console.png)
+![After killing the leader, a new leader is elected](docs/images/dashboard-failover.png)
+
+</details>
+
 <br>
 
 ## 📑 Table of Contents
