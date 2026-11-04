@@ -62,8 +62,8 @@
 > durable log, survive `kill -9`, and serve a key-value API with linearizable reads. A
 > responsive dashboard (desktop and phone) shows every node's own view live, and can
 > crash, revive, slow down, and partition the real processes. The Docker setup is
-> included but **untested**, and nothing is deployed yet; a hosted-demo setup for Render
-> and Vercel is prepared (see [Deployment](#deployment)).
+> included but **untested**. A live demo is hosted on Render and Vercel: try it at
+> **[raft-kv.vercel.app](https://raft-kv.vercel.app)** (see [Deployment](#deployment)).
 
 <br>
 
@@ -105,7 +105,7 @@
 - **Plain-language narration** — the dashboard explains what is happening: *election in progress*, *stale leader*, *no majority*, *node catching up*.
 - **Built to run on a phone** — the dashboard is responsive, and the backend runs happily under Termux.
 - **Rate limiting built in** — a per-client limit on the client API (default 600 requests per 10 s), plus a 64 KiB value cap, both configurable.
-- **Ready to host** — a single-port gateway, a demo image, and a Render blueprint put the whole cluster behind one URL, with the dashboard on Vercel. Prepared but not yet deployed; see [Deployment](#deployment).
+- **Ready to host** — a single-port gateway, a demo image, and a Render blueprint put the whole cluster behind one URL, with the dashboard on Vercel. Live at [raft-kv.vercel.app](https://raft-kv.vercel.app); see [Deployment](#deployment).
 - **Built on its author's own libraries** — consensus, HTTP, rate limiting and the write-ahead log are all vendored as submodules (see [Stack](#stack)).
 
 <div align="right"><a href="#-table-of-contents"><img src=".github/assets/back-to-top.svg" alt="Back to top" height="28"></a></div>
@@ -345,14 +345,21 @@ docker compose down -v                 # stop and delete the data
 
 RaftKV can run as a **public demo**: the backend (the launcher, three real nodes, and a gateway) in one container on [Render](https://render.com), and the dashboard on [Vercel](https://vercel.com). The gateway puts the whole cluster behind a single port, forwards only the routes the dashboard needs, and shares each node's live stream between any number of visitors.
 
+**Live demo:** [raft-kv.vercel.app](https://raft-kv.vercel.app) (dashboard on Vercel) · backend on Render at `https://raftkv-5ruc.onrender.com`
+
+> [!NOTE]
+> The backend runs on Render's free plan, which sleeps when idle. The first visit after a quiet spell can take **50 seconds or more** to wake, and the cluster then needs a few seconds to elect a leader.
+
+To deploy your own copy:
+
 ```bash
 # Render:  New → Blueprint, pick this repo (render.yaml), then set ALLOWED_ORIGINS
 # Vercel:  import the repo, Root Directory = frontend, set VITE_NODE_URLS and VITE_LAUNCHER_URL
 scripts/check-demo.sh https://<your-service>.onrender.com https://<your-app>.vercel.app
 ```
 
-> [!CAUTION]
-> **Prepared, not yet deployed.** The gateway, watchdog, and the dashboard's client logic were tested locally against the real backend, and the `Demo image` workflow builds and checks the container in CI. Nothing has been run on Render or Vercel yet. The step-by-step guide, including exactly what was and wasn't verified, is in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
+> [!NOTE]
+> **Deployed.** The demo is running on Render (backend) and Vercel (dashboard). The gateway, watchdog, and the dashboard's client logic were also tested locally against the real backend, and the `Demo image` workflow builds and checks the container in CI. The step-by-step guide, including exactly what was and wasn't verified, is in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
 > [!WARNING]
 > A public demo means **anyone can crash the cluster** with the Kill button. That is the point, and it is contained: the gateway allows only the dashboard's routes, rate-limits destructive actions, never exposes the nodes' peer-to-peer routes, and a watchdog heals a cluster left broken. Nothing persists. See [SECURITY.md](SECURITY.md#hosted-demo).
