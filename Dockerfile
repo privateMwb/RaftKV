@@ -15,7 +15,7 @@
 # an image build tracks the libraries' latest main.
 # ============================================================
 
-FROM ubuntu:24.04 AS build
+FROM ubuntu:26.04 AS build
 
 RUN apt-get update && \
     apt-get install -y \
@@ -47,7 +47,7 @@ RUN cmake -S . -B build \
 RUN cmake --build build --config Release --target raftkv_backend -j$(nproc)
 
 
-FROM ubuntu:24.04
+FROM ubuntu:26.04
 
 RUN apt-get update && \
     apt-get install -y \
