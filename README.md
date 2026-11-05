@@ -40,6 +40,9 @@
   <a href="https://github.com/privateMwb/RaftKV/actions/workflows/codeql.yml">
     <img src="https://github.com/privateMwb/RaftKV/actions/workflows/codeql.yml/badge.svg" alt="CodeQL">
   </a>
+<a href="https://github.com/privateMwb/RaftKV/actions/workflows/cflite_pr.yml">
+    <img src="https://github.com/privateMwb/RaftKV/actions/workflows/cflite_pr.yml/badge.svg" alt="PR Fuzzing">
+  </a>
 </p>
 
 <p align="center"><sub><b>Documentation</b></sub></p>
