@@ -18,14 +18,25 @@ updates:
       interval: "weekly"
     commit-message:
       prefix: "ci"
-    # One PR for every update in this ecosystem. Without a group, Dependabot opens a PR per
-    # dependency, and sub-actions of one repo (e.g. clusterfuzzlite build_fuzzers and
-    # run_fuzzers) count as separate dependencies, so each PR bumps only its own lines and
-    # leaves the others on the old version. A group moves them all together.
+    # Sub-actions of one repo are separate dependencies to Dependabot, so each pair gets a group
+    # that moves it together in ONE PR, for every kind of update (major included). Otherwise one
+    # PR bumps build_fuzzers and leaves run_fuzzers on the old version, or the reverse.
+    # Everything else is grouped for minor and patch bumps only: a major bump gets its own PR, so
+    # it can fail or be postponed without holding back the rest. (A dependency joins the first
+    # group that matches it, which is why the specific groups come first.)
     groups:
-      github-actions:
+      codeql-action:
+        patterns:
+          - "github/codeql-action/*"
+      clusterfuzzlite:
+        patterns:
+          - "google/clusterfuzzlite/*"
+      actions-minor-patch:
         patterns:
           - "*"
+        update-types:
+          - "minor"
+          - "patch"
 
   - package-ecosystem: "npm"
     directory: "/frontend"
@@ -33,10 +44,23 @@ updates:
       interval: "weekly"
     commit-message:
       prefix: "npm"
+    # Minor and patch bumps share one PR. A major bump gets its own PR, so a breaking release
+    # (for example a new TypeScript major) can't sink the whole group.
     groups:
-      npm:
+      npm-minor-patch:
         patterns:
           - "*"
+        update-types:
+          - "minor"
+          - "patch"
+    ignore:
+      # typescript-eslint caps its TypeScript peer at "<6.1.0" (checked on its latest release,
+      # 8.72.1), so a newer TypeScript makes `npm ci` fail with ERESOLVE. Stay on 6.0.x until
+      # typescript-eslint widens its range, then delete this block.
+      - dependency-name: "typescript"
+        update-types:
+          - "version-update:semver-minor"
+          - "version-update:semver-major"
 
   - package-ecosystem: "docker"
     directory: "/"
