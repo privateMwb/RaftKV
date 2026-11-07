@@ -33,7 +33,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         # No submodules needed here — Doxygen only reads
         # backend/include, backend/src, and README.md (see
         # docs/Doxyfile's EXCLUDE), never backend/external/'s
@@ -50,7 +50,7 @@ jobs:
         run: doxygen Doxyfile
 
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: docs/html
 
@@ -65,4 +65,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5

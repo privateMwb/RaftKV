@@ -39,7 +39,7 @@ jobs:
       # The backend builds against git submodules, so they must be present
       # in the workspace before the fuzzers are built.
       - name: Checkout (with submodules)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           submodules: recursive
 
