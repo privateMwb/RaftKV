@@ -18,10 +18,14 @@ updates:
       interval: "weekly"
     commit-message:
       prefix: "ci"
+    # One PR for every update in this ecosystem. Without a group, Dependabot opens a PR per
+    # dependency, and sub-actions of one repo (e.g. clusterfuzzlite build_fuzzers and
+    # run_fuzzers) count as separate dependencies, so each PR bumps only its own lines and
+    # leaves the others on the old version. A group moves them all together.
     groups:
-      codeql-action:
+      github-actions:
         patterns:
-          - "github/codeql-action/*"
+          - "*"
 
   - package-ecosystem: "npm"
     directory: "/frontend"
@@ -29,6 +33,10 @@ updates:
       interval: "weekly"
     commit-message:
       prefix: "npm"
+    groups:
+      npm:
+        patterns:
+          - "*"
 
   - package-ecosystem: "docker"
     directory: "/"
@@ -39,9 +47,18 @@ updates:
 
   # OSS-Fuzz base image used by ClusterFuzzLite. Keeps the pinned
   # sha256 digest in .clusterfuzzlite/Dockerfile up to date.
+    groups:
+      docker:
+        patterns:
+          - "*"
+
   - package-ecosystem: "docker"
     directory: "/.clusterfuzzlite"
     schedule:
       interval: "weekly"
     commit-message:
       prefix: "docker"
+    groups:
+      docker:
+        patterns:
+          - "*"
