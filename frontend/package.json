@@ -16,7 +16,7 @@
     "dev:host": "vite --host"
   },
   "dependencies": {
-    "@tailwindcss/vite": "^4.3.4",
+    "@tailwindcss/vite": "^4.3.5",
     "boxicons": "^2.1.4",
     "clsx": "^2.1.1",
     "react": "^19.2.8",
@@ -30,7 +30,7 @@
     "@types/node": "^26.6.6",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.3.0",
-    "@vitejs/plugin-react": "^6.2.1",
+    "@vitejs/plugin-react": "^6.3.0",
     "eslint": "^10.14.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react-hooks": "^7.1.1",
@@ -38,7 +38,7 @@
     "globals": "^17.14.0",
     "prettier": "^3.9.10",
     "typescript": "~6.0.3",
-    "typescript-eslint": "^8.72.1",
-    "vite": "^8.3.5"
+    "typescript-eslint": "^8.72.2",
+    "vite": "^8.3.7"
   }
 }
